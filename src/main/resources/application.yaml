@@ -1,0 +1,6 @@
+ktor:
+    application:
+        modules:
+            - com.Biodex.ApplicationKt.module
+    deployment:
+        port: 8080
