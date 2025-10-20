@@ -11,7 +11,7 @@ data class Specimen(
      val collectionDate: LocalDate,
      val mainPhoto: String?,
      val collector: String,
-     val location: Int,
+     val location: domain.models.Location?,
      val individualsCount: Int,
      val determinationYear: Int,
      val determinador: String,
@@ -39,4 +39,19 @@ data class SpecimenImage(
      val fileName: String,
      val fileUrl: String,
      val displayOrder: Int
+)
+@Serializable
+data class Location(
+     val id: Int,
+     val country: String,
+     val state : String,
+     val municipality: String,
+     val locality: String,
+     val latitude_degrees:Int,
+     val latitude_minutes:Int,
+     val latitude_seconds: Double,
+     val longitude_degrees:Int,
+     val longitude_minutes:Int,
+     val longitude_seconds: Double,
+     val altitude: Double
 )

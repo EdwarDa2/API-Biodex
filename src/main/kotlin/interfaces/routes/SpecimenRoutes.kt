@@ -29,7 +29,7 @@ fun Route.specimenRoutes(specimenService: SpecimenService) {
             if (specimen != null) {
                 call.respond(HttpStatusCode.OK, specimen)
             } else {
-                // Si es nulo, responde con No Encontrado.
+
                 call.respond(HttpStatusCode.NotFound)
             }
         }

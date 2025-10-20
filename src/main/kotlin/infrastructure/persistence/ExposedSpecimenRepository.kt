@@ -4,6 +4,7 @@ import domain.models.*
 import domain.repositorys.NewSpecimenData
 import domain.repositorys.SpecimenRepository
 import domain.repositorys.UpdateSpecimenData
+import infrastructure.config.DatabaseFactory.dbQuery
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -15,8 +16,8 @@ class ExposedSpecimenRepository : SpecimenRepository {
         println("🔎 Buscando espécimen con ID recibido: $id")
 
         return transaction {
-            try { // <-- AÑADIR TRY
-                val row = (SpecimensTable leftJoin TaxonomyTable)
+            try {
+                val row = (SpecimensTable leftJoin SpecimensLocationTable leftJoin TaxonomyTable)
                     .selectAll()
                     .where { SpecimensTable.id eq id }
                     .singleOrNull()
@@ -44,6 +45,7 @@ class ExposedSpecimenRepository : SpecimenRepository {
                 println("------------------------------------------")
                 return@transaction null // Devuelve null porque hubo un error
             }
+
         }
     }
 
@@ -60,7 +62,7 @@ class ExposedSpecimenRepository : SpecimenRepository {
                 it[collectionDate] = specimenData.collectionDate
                 it[mainPhoto] = specimenData.mainPhoto
                 it[collector] = specimenData.collector
-                it[location] = specimenData.location
+                it[idLocation] = specimenData.idLocation
                 it[individualsCount] = specimenData.individualsCount
                 it[determinationYear] = specimenData.determinationYear
                 it[determinador] = specimenData.determinador
@@ -81,7 +83,7 @@ class ExposedSpecimenRepository : SpecimenRepository {
                 it[collectionDate] = specimenData.collectionDate
                 it[mainPhoto] = specimenData.mainPhoto
                 it[collector] = specimenData.collector
-                it[location] = specimenData.location
+                it[idLocation] = specimenData.idLocation
                 it[individualsCount] = specimenData.individualsCount
                 it[determinationYear] = specimenData.determinationYear
                 it[determinador] = specimenData.determinador
@@ -114,7 +116,6 @@ class ExposedSpecimenRepository : SpecimenRepository {
         collectionDate = this[SpecimensTable.collectionDate],
         mainPhoto = this[SpecimensTable.mainPhoto],
         collector = this[SpecimensTable.collector],
-        location = this[SpecimensTable.location],
         individualsCount = this[SpecimensTable.individualsCount],
         determinationYear = this[SpecimensTable.determinationYear],
         determinador = this[SpecimensTable.determinador],
@@ -123,6 +124,7 @@ class ExposedSpecimenRepository : SpecimenRepository {
         collectionMethod = this[SpecimensTable.collectionMethod],
         notes = this[SpecimensTable.notes],
         taxonomy = this.toTaxonomy(),
+        location = this.toLocation(),
         images = images
     )
 
@@ -141,4 +143,30 @@ class ExposedSpecimenRepository : SpecimenRepository {
         fileUrl = this[SpecimenImagesTable.fileUrl],
         displayOrder = this[SpecimenImagesTable.displayOrder]
     )
+    private fun ResultRow.toLocation(): Location? { // <--- 1. Añade '?'
+
+        // 2. Comprueba si el ID de la localización es null.
+        // Si lo es, significa que el leftJoin no encontró nada.
+        if (this[SpecimensLocationTable.id] == null) {
+            return null // Devuelve null si no hay localización
+        }
+
+        // 3. Si no es null, crea y devuelve el objeto
+        return Location(
+            id = this[SpecimensLocationTable.id], // Ahora esto es seguro
+            country = this[SpecimensLocationTable.country],
+            state = this[SpecimensLocationTable.state],
+            municipality =  this[SpecimensLocationTable.municipality],
+            locality = this[SpecimensLocationTable.locality],
+            latitude_degrees = this[SpecimensLocationTable.latitude_degrees],
+            latitude_minutes = this[SpecimensLocationTable.latitude_minutes],
+            latitude_seconds = this[SpecimensLocationTable.latitude_seconds],
+            longitude_degrees = this[SpecimensLocationTable.longitude_degrees],
+            longitude_minutes = this[SpecimensLocationTable.longitude_minutes],
+            longitude_seconds = this[SpecimensLocationTable.longitude_seconds],
+            altitude = this[SpecimensLocationTable.altitude]
+        )
+    }
+
+
 }
