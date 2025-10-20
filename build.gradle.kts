@@ -13,7 +13,7 @@ version = "0.0.1"
 application {
     mainClass = "io.ktor.server.netty.EngineMain"
 }
-
+val exposed_version = "0.51.0"
 dependencies {
     implementation("io.ktor:ktor-server-core")
     implementation("io.ktor:ktor-server-content-negotiation")
@@ -26,4 +26,10 @@ dependencies {
     implementation("io.ktor:ktor-server-config-yaml")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
+    implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
+    implementation("org.postgresql:postgresql:42.7.3")
+    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:${exposed_version}")
+    implementation("com.zaxxer:HikariCP:5.1.0")
 }

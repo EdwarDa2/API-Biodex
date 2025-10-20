@@ -1,6 +1,14 @@
 ktor:
+    deployment:
+        port: 8080
     application:
         modules:
             - com.Biodex.ApplicationKt.module
-    deployment:
-        port: 8080
+
+
+db:
+    url: "jdbc:postgresql://localhost:5432/Biodex"
+    driver: "org.postgresql.Driver"
+    user: "postgres"
+    password: "edwardaniel"
+    poolSize: 10
