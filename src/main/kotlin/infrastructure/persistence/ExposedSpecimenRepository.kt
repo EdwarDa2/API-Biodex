@@ -107,6 +107,17 @@ class ExposedSpecimenRepository : SpecimenRepository {
         }
     }
 
+    override fun addImage(idSpecimen: Int, fileName: String, fileUrl: String, displayOrder: Int) {
+        transaction {
+            SpecimenImagesTable.insert {
+                it[this.idSpecimen] =  idSpecimen
+                it[this.fileName] =  fileName
+                it[this.fileUrl]  = fileUrl
+                it[this.displayOrder] =  displayOrder
+            }
+        }
+    }
+
 
 
     private fun ResultRow.toSpecimen(images: List<SpecimenImage>): Specimen = Specimen(
@@ -143,17 +154,15 @@ class ExposedSpecimenRepository : SpecimenRepository {
         fileUrl = this[SpecimenImagesTable.fileUrl],
         displayOrder = this[SpecimenImagesTable.displayOrder]
     )
-    private fun ResultRow.toLocation(): Location? { // <--- 1. Añade '?'
+    private fun ResultRow.toLocation(): Location? {
 
-        // 2. Comprueba si el ID de la localización es null.
-        // Si lo es, significa que el leftJoin no encontró nada.
         if (this[SpecimensLocationTable.id] == null) {
-            return null // Devuelve null si no hay localización
+            return null
         }
 
-        // 3. Si no es null, crea y devuelve el objeto
+
         return Location(
-            id = this[SpecimensLocationTable.id], // Ahora esto es seguro
+            id = this[SpecimensLocationTable.id],
             country = this[SpecimensLocationTable.country],
             state = this[SpecimensLocationTable.state],
             municipality =  this[SpecimensLocationTable.municipality],

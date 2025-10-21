@@ -11,7 +11,7 @@ data class Specimen(
      val collectionDate: LocalDate,
      val mainPhoto: String?,
      val collector: String,
-     val location: domain.models.Location?,
+     val location: Location?,
      val individualsCount: Int,
      val determinationYear: Int,
      val determinador: String,

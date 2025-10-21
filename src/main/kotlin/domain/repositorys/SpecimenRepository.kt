@@ -10,6 +10,7 @@ interface SpecimenRepository {
     fun save(specimenData: NewSpecimenData): Specimen
     fun delete(id: Int): Boolean
     fun update(id: Int, specimenData: UpdateSpecimenData): Specimen?
+    fun addImage(idSpecimen: Int, fileName: String, fileUrl: String, displayOrder: Int)
 }
 
 @Serializable
