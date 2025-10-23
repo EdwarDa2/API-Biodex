@@ -1,8 +1,12 @@
 package com.Biodex.interfaces.routes
 
-import com.Biodex.application.services.LocationService
-import com.Biodex.domain.models.renewLocation
+import com.Biodex.application.services.TaxonomyService
+import com.Biodex.domain.models.NewTaxonomyData
+import com.Biodex.domain.models.Taxonomy
+import com.Biodex.interfaces.controllers.TaxonomyResponse
 import com.Biodex.interfaces.controllers.toResponse
+import domain.repositorys.UpdateSpecimenData
+import interfaces.controllers.toResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -11,32 +15,35 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
+import kotlin.text.toIntOrNull
 
-fun Route.locationRoutes(locationService: LocationService) {
-    route("/locations") {
+
+fun Route.taxonomyRoutes(taxonomyService: TaxonomyService) {
+    route("/taxonomy") {
         get("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
-                call.respond(HttpStatusCode.BadRequest, "ID  inválido.")
+            if(id == null){
+                call.respond(HttpStatusCode.BadRequest,"Id invalido")
                 return@get
             }
-            val location = locationService.getLocation(id) ?: return@get
-
-            if (location != null) {
-                call.respond(HttpStatusCode.OK, location)
-            } else {
+            val taxonomy = taxonomyService.getTaxonomy(id) ?: return@get
+            if(taxonomy != null){
+                call.respond(HttpStatusCode.OK, taxonomy)
+            }else {
                 call.respond(HttpStatusCode.NotFound)
             }
         }
         post {
-            try {
-                val locationData = call.receive<renewLocation>()
-                val newLocation = locationService.saveLocation(locationData)
-                call.respond(HttpStatusCode.Created, "Locacion  Guarda: ${newLocation?.id}")
+            try{
+                val taxonomyData = call.receive<NewTaxonomyData>()
+                val newTaxonomy = taxonomyService.createTaxonomy(taxonomyData)
+                call.respond(HttpStatusCode.Created, "Taxonomia  creada: ${newTaxonomy?.id}")
+
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, "Datos invaldos: ${e.localizedMessage}")
             }
         }
+
         put("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
 
@@ -46,12 +53,12 @@ fun Route.locationRoutes(locationService: LocationService) {
                 return@put
             }
             try {
-                val locationData = call.receive<renewLocation>()
-                val updateLocation = locationService.updateLocation(id, locationData)
+                val taxonomyData = call.receive<NewTaxonomyData>()
+                val updatedTaxonomy = taxonomyService.updateTaxonomy(id, taxonomyData)
 
-                println("◀️ RESULTADO DEL REPOSITORIO: $updateLocation")
-                if (updateLocation != null) {
-                    call.respond(HttpStatusCode.OK, updateLocation.toResponse())
+                println("◀️ RESULTADO DEL REPOSITORIO: $updatedTaxonomy")
+                if (updatedTaxonomy != null) {
+                    call.respond(HttpStatusCode.OK, updatedTaxonomy.toResponse())
                 } else {
                     println("❌ NO SE ENCONTRÓ EL ID $id. ENVIANDO 404.")
                     call.respond(HttpStatusCode.NotFound)

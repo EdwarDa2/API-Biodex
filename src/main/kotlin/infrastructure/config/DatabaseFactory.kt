@@ -1,7 +1,7 @@
 package infrastructure.config
 
 import com.Biodex.infrastructure.persistence.SpecimenImagesTable
-import com.Biodex.infrastructure.persistence.SpecimensLocationTable
+import com.Biodex.infrastructure.persistence.LocationTable
 import com.Biodex.infrastructure.persistence.TaxonomyTable
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -27,7 +27,7 @@ object DatabaseFactory {
 
 
         transaction {
-            SchemaUtils.create(TaxonomyTable, SpecimensTable, SpecimenImagesTable, SpecimensLocationTable)
+            SchemaUtils.create(TaxonomyTable, SpecimensTable, SpecimenImagesTable, LocationTable)
         }
     }
 

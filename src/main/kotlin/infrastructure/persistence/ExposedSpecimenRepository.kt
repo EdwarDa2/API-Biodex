@@ -7,12 +7,13 @@ import domain.repositorys.UpdateSpecimenData
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
-import com.Biodex.domain.models.Taxonomy
 import com.Biodex.domain.models.Location
 import com.Biodex.domain.models.SpecimenImage
 import com.Biodex.infrastructure.persistence.SpecimenImagesTable
-import com.Biodex.infrastructure.persistence.SpecimensLocationTable
+import com.Biodex.infrastructure.persistence.LocationTable
 import com.Biodex.infrastructure.persistence.TaxonomyTable
+import com.Biodex.infrastructure.persistence.toLocation
+import com.Biodex.infrastructure.persistence.toTaxonomy
 
 class ExposedSpecimenRepository : SpecimenRepository {
 
@@ -22,7 +23,7 @@ class ExposedSpecimenRepository : SpecimenRepository {
 
         return transaction {
             try {
-                val row = (SpecimensTable leftJoin SpecimensLocationTable leftJoin TaxonomyTable)
+                val row = (SpecimensTable leftJoin LocationTable leftJoin TaxonomyTable)
                     .selectAll()
                     .where { SpecimensTable.id eq id }
                     .singleOrNull()
@@ -99,7 +100,6 @@ class ExposedSpecimenRepository : SpecimenRepository {
                 it[notes] = specimenData.notes
             }
         }
-
         return if (updatedRows > 0) {
             findById(id)
         } else {
@@ -133,14 +133,6 @@ class ExposedSpecimenRepository : SpecimenRepository {
         images = images
     )
 
-    private fun ResultRow.toTaxonomy(): Taxonomy = Taxonomy(
-        id = this[TaxonomyTable.id],
-        family = this[TaxonomyTable.family],
-        genus = this[TaxonomyTable.genus],
-        species = this[TaxonomyTable.species],
-        category = this[TaxonomyTable.category]
-    )
-
     private fun ResultRow.toSpecimenImage(): SpecimenImage = SpecimenImage(
         id = this[SpecimenImagesTable.id],
         idSpecimen = this[SpecimenImagesTable.idSpecimen],
@@ -148,29 +140,4 @@ class ExposedSpecimenRepository : SpecimenRepository {
         fileUrl = this[SpecimenImagesTable.fileUrl],
         displayOrder = this[SpecimenImagesTable.displayOrder]
     )
-
-    private fun ResultRow.toLocation(): Location? {
-
-        if (this[SpecimensLocationTable.id] == null) {
-            return null
-        }
-
-
-        return Location(
-            id = this[SpecimensLocationTable.id],
-            country = this[SpecimensLocationTable.country],
-            state = this[SpecimensLocationTable.state],
-            municipality = this[SpecimensLocationTable.municipality],
-            locality = this[SpecimensLocationTable.locality],
-            latitude_degrees = this[SpecimensLocationTable.latitude_degrees],
-            latitude_minutes = this[SpecimensLocationTable.latitude_minutes],
-            latitude_seconds = this[SpecimensLocationTable.latitude_seconds],
-            longitude_degrees = this[SpecimensLocationTable.longitude_degrees],
-            longitude_minutes = this[SpecimensLocationTable.longitude_minutes],
-            longitude_seconds = this[SpecimensLocationTable.longitude_seconds],
-            altitude = this[SpecimensLocationTable.altitude]
-        )
-    }
-
-
 }

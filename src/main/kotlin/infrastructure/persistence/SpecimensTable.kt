@@ -1,6 +1,6 @@
 package infrastructure.persistence
 
-import com.Biodex.infrastructure.persistence.SpecimensLocationTable
+import com.Biodex.infrastructure.persistence.LocationTable
 import com.Biodex.infrastructure.persistence.TaxonomyTable
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date
@@ -14,7 +14,7 @@ object SpecimensTable : Table("specimens") {
     val collectionDate = date("collection_date")
     val mainPhoto = varchar("main_photo", 1024).nullable()
     val collector = varchar("collector", 255)
-    val idLocation = integer("location").references(SpecimensLocationTable.id)
+    val idLocation = integer("location").references(LocationTable.id)
     val individualsCount = integer("individuals_count")
     val determinationYear = integer("determination_year")
     val determinador = varchar("determinador", 255)

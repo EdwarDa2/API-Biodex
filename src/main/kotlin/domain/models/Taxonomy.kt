@@ -10,3 +10,10 @@ data class Taxonomy(
     val species: String,
     val category: String
 )
+@Serializable
+data class NewTaxonomyData(
+    val family: String,
+    val genus: String,
+    val species: String,
+    val category: String
+)

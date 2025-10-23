@@ -2,7 +2,7 @@ package com.Biodex.infrastructure.persistence
 
 import org.jetbrains.exposed.sql.Table
 
-object  SpecimensLocationTable : Table("locations") {
+object  LocationTable : Table("locations") {
     val id = integer("id").autoIncrement()
     val country = varchar("country", 255)
     val state  = varchar("state", 255)

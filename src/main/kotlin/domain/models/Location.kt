@@ -18,3 +18,17 @@ data class Location(
     val longitude_seconds: Double,
     val altitude: Double
 )
+@Serializable
+data class renewLocation(
+    val country: String,
+    val state : String,
+    val municipality: String,
+    val locality: String,
+    val latitude_degrees:Int,
+    val latitude_minutes:Int,
+    val latitude_seconds: Double,
+    val longitude_degrees:Int,
+    val longitude_minutes:Int,
+    val longitude_seconds: Double,
+    val altitude: Double
+)

@@ -24,7 +24,6 @@ fun Route.specimenRoutes(specimenService: SpecimenService) {
             if (specimen != null) {
                 call.respond(HttpStatusCode.OK, specimen)
             } else {
-
                 call.respond(HttpStatusCode.NotFound)
             }
         }
