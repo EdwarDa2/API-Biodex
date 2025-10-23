@@ -1,5 +1,8 @@
 package domain.models
 
+import com.Biodex.domain.models.Location
+import com.Biodex.domain.models.SpecimenImage
+import com.Biodex.domain.models.Taxonomy
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 
@@ -21,37 +24,4 @@ data class Specimen(
      val notes: String?,
      val taxonomy: Taxonomy,
      val images: List<SpecimenImage>
-)
-
-@Serializable
-data class Taxonomy(
-     val id: Int,
-     val family: String,
-     val genus: String,
-     val species: String,
-     val category: String
-)
-
-@Serializable
-data class SpecimenImage(
-     val id: Int,
-     val idSpecimen: Int,
-     val fileName: String,
-     val fileUrl: String,
-     val displayOrder: Int
-)
-@Serializable
-data class Location(
-     val id: Int,
-     val country: String,
-     val state : String,
-     val municipality: String,
-     val locality: String,
-     val latitude_degrees:Int,
-     val latitude_minutes:Int,
-     val latitude_seconds: Double,
-     val longitude_degrees:Int,
-     val longitude_minutes:Int,
-     val longitude_seconds: Double,
-     val altitude: Double
 )

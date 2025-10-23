@@ -4,10 +4,15 @@ import domain.models.*
 import domain.repositorys.NewSpecimenData
 import domain.repositorys.SpecimenRepository
 import domain.repositorys.UpdateSpecimenData
-import infrastructure.config.DatabaseFactory.dbQuery
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
+import com.Biodex.domain.models.Taxonomy
+import com.Biodex.domain.models.Location
+import com.Biodex.domain.models.SpecimenImage
+import com.Biodex.infrastructure.persistence.SpecimenImagesTable
+import com.Biodex.infrastructure.persistence.SpecimensLocationTable
+import com.Biodex.infrastructure.persistence.TaxonomyTable
 
 class ExposedSpecimenRepository : SpecimenRepository {
 
@@ -74,6 +79,7 @@ class ExposedSpecimenRepository : SpecimenRepository {
         }
         return findById(newId)!!
     }
+
     override fun update(id: Int, specimenData: UpdateSpecimenData): Specimen? {
         val updatedRows = transaction {
             SpecimensTable.update({ SpecimensTable.id eq id }) {
@@ -106,18 +112,6 @@ class ExposedSpecimenRepository : SpecimenRepository {
             SpecimensTable.deleteWhere { SpecimensTable.id eq id } > 0
         }
     }
-
-    override fun addImage(idSpecimen: Int, fileName: String, fileUrl: String, displayOrder: Int) {
-        transaction {
-            SpecimenImagesTable.insert {
-                it[this.idSpecimen] =  idSpecimen
-                it[this.fileName] =  fileName
-                it[this.fileUrl]  = fileUrl
-                it[this.displayOrder] =  displayOrder
-            }
-        }
-    }
-
 
 
     private fun ResultRow.toSpecimen(images: List<SpecimenImage>): Specimen = Specimen(
@@ -154,6 +148,7 @@ class ExposedSpecimenRepository : SpecimenRepository {
         fileUrl = this[SpecimenImagesTable.fileUrl],
         displayOrder = this[SpecimenImagesTable.displayOrder]
     )
+
     private fun ResultRow.toLocation(): Location? {
 
         if (this[SpecimensLocationTable.id] == null) {
@@ -165,7 +160,7 @@ class ExposedSpecimenRepository : SpecimenRepository {
             id = this[SpecimensLocationTable.id],
             country = this[SpecimensLocationTable.country],
             state = this[SpecimensLocationTable.state],
-            municipality =  this[SpecimensLocationTable.municipality],
+            municipality = this[SpecimensLocationTable.municipality],
             locality = this[SpecimensLocationTable.locality],
             latitude_degrees = this[SpecimensLocationTable.latitude_degrees],
             latitude_minutes = this[SpecimensLocationTable.latitude_minutes],

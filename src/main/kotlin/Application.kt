@@ -1,6 +1,9 @@
 package com.Biodex
 
 import application.services.SpecimenService
+import com.Biodex.application.services.SpecimenImageService
+import com.Biodex.infrastructure.persistence.ExposedSpecimenImageRepository
+import com.Biodex.interfaces.routes.specimenImageRoutes
 import infrastructure.config.DatabaseFactory
 import infrastructure.persistence.ExposedSpecimenRepository
 import interfaces.routes.specimenRoutes
@@ -17,7 +20,6 @@ fun Application.module() {
 
 
     install(ContentNegotiation) {
-
         json()
     }
 
@@ -27,9 +29,12 @@ fun Application.module() {
 
     val specimenRepository = ExposedSpecimenRepository()
     val specimenService = SpecimenService(specimenRepository)
+    val specimenImageRepository = ExposedSpecimenImageRepository()
+    val specimenImageService = SpecimenImageService(specimenImageRepository)
 
 
     routing {
         specimenRoutes(specimenService)
+        specimenImageRoutes(specimenImageService)
     }
 }

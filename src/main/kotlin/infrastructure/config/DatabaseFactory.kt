@@ -1,12 +1,11 @@
 package infrastructure.config
 
+import com.Biodex.infrastructure.persistence.SpecimenImagesTable
+import com.Biodex.infrastructure.persistence.SpecimensLocationTable
+import com.Biodex.infrastructure.persistence.TaxonomyTable
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import infrastructure.persistence.SpecimenImagesTable
-import infrastructure.persistence.SpecimensLocationTable
 import infrastructure.persistence.SpecimensTable
-import infrastructure.persistence.TaxonomyTable
-import io.ktor.server.application.*
 import io.ktor.server.config.ApplicationConfig
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
