@@ -1,8 +1,8 @@
 package interfaces.routes
 
 import application.services.SpecimenService
-import domain.repositorys.NewSpecimenData
-import domain.repositorys.UpdateSpecimenData
+import domain.models.NewSpecimenData
+import domain.models.UpdateSpecimenData
 import interfaces.controllers.toResponse
 import io.ktor.http.*
 import io.ktor.server.request.*
@@ -12,6 +12,10 @@ import io.ktor.server.routing.*
 
 fun Route.specimenRoutes(specimenService: SpecimenService) {
     route("/specimens") {
+        get {
+            val specimens = specimenService.findAll()
+            call.respond(HttpStatusCode.OK, specimens.map { it.toResponse() })
+        }
         get("{id}") {
 
             val id = call.parameters["id"]?.toIntOrNull()

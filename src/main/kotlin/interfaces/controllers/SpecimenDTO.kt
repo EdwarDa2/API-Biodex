@@ -1,5 +1,8 @@
 package interfaces.controllers
 
+import com.Biodex.domain.models.Collection
+import com.Biodex.domain.models.SpecimenImage
+import com.Biodex.interfaces.controllers.CollectionResponse
 import domain.models.Specimen
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
@@ -20,6 +23,7 @@ data class SpecimenResponse(
     val collectionMethod: String,
     val notes: String?,
     val scientificName: String,
+    val images: List<SpecimenImage>
 )
 
 fun Specimen.toResponse(): SpecimenResponse {
@@ -36,6 +40,7 @@ fun Specimen.toResponse(): SpecimenResponse {
         vegetationType = this.vegetationType,
         collectionMethod = this.collectionMethod,
         notes = this.notes,
-        scientificName = "${this.taxonomy.genus} ${this.taxonomy.species}"
+        scientificName = "${this.taxonomy.genus} ${this.taxonomy.species}",
+        images = this.images
     )
 }

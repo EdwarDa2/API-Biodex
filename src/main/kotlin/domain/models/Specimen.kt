@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Specimen(
      val id: Int,
-     val idCollection: Int,
+     val idCollection: Int?,
      val commonName: String,
      val collectionDate: LocalDate,
      val mainPhoto: String?,
@@ -24,4 +24,38 @@ data class Specimen(
      val notes: String?,
      val taxonomy: Taxonomy,
      val images: List<SpecimenImage>
+)
+@Serializable
+data class NewSpecimenData(
+     val idCollection: Int,
+     val commonName: String,
+     val idTaxonomy: Int,
+     val collectionDate: LocalDate,
+     val mainPhoto: String?,
+     val collector: String,
+     val idLocation: Int,
+     val individualsCount: Int,
+     val determinationYear: Int,
+     val determinador: String,
+     val sex: String,
+     val vegetationType: String,
+     val collectionMethod: String,
+     val notes: String?
+)
+@Serializable
+data class UpdateSpecimenData(
+     val idCollection: Int,
+     val commonName: String,
+     val idTaxonomy: Int,
+     val collectionDate: LocalDate,
+     val mainPhoto: String?,
+     val collector: String,
+     val idLocation: Int,
+     val individualsCount: Int,
+     val determinationYear: Int,
+     val determinador: String,
+     val sex: String,
+     val vegetationType: String,
+     val collectionMethod: String,
+     val notes: String?
 )

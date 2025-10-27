@@ -1,14 +1,16 @@
 package infrastructure.persistence
 
+import com.Biodex.infrastructure.persistence.CollectionTable
 import com.Biodex.infrastructure.persistence.LocationTable
 import com.Biodex.infrastructure.persistence.TaxonomyTable
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date
+import java.util.Collections
 
 
 object SpecimensTable : Table("specimens") {
     val id = integer("id").autoIncrement()
-    val idCollection = integer("id_collection")
+    val idCollection = integer("id_collection").references(CollectionTable.id).nullable()
     val commonName = varchar("common_name", 255)
     val idTaxonomy = integer("id_taxonomy").references(TaxonomyTable.id)
     val collectionDate = date("collection_date")

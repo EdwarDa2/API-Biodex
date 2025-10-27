@@ -1,12 +1,15 @@
 package com.Biodex
 
 import application.services.SpecimenService
+import com.Biodex.application.services.CollectionService
 import com.Biodex.application.services.LocationService
 import com.Biodex.application.services.SpecimenImageService
 import com.Biodex.application.services.TaxonomyService
+import com.Biodex.infrastructure.persistence.ExposedCollectionRespository
 import com.Biodex.infrastructure.persistence.ExposedLocationRepository
 import com.Biodex.infrastructure.persistence.ExposedSpecimenImageRepository
 import com.Biodex.infrastructure.persistence.ExposedTaxonomyRepository
+import com.Biodex.interfaces.routes.collectionRoutes
 import com.Biodex.interfaces.routes.locationRoutes
 import com.Biodex.interfaces.routes.specimenImageRoutes
 import com.Biodex.interfaces.routes.taxonomyRoutes
@@ -41,6 +44,8 @@ fun Application.module() {
     val taxonomyService = TaxonomyService(taxonomyRepository)
     val locationRepository = ExposedLocationRepository()
     val locationService = LocationService(locationRepository)
+    val collectionRepository = ExposedCollectionRespository()
+    val collectionService = CollectionService(collectionRepository,specimenRepository)
 
 
 
@@ -49,5 +54,6 @@ fun Application.module() {
         specimenImageRoutes(specimenImageService)
         taxonomyRoutes(taxonomyService)
         locationRoutes(locationService)
+        collectionRoutes(collectionService)
     }
 }

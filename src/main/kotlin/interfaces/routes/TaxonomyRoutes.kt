@@ -2,11 +2,7 @@ package com.Biodex.interfaces.routes
 
 import com.Biodex.application.services.TaxonomyService
 import com.Biodex.domain.models.NewTaxonomyData
-import com.Biodex.domain.models.Taxonomy
-import com.Biodex.interfaces.controllers.TaxonomyResponse
 import com.Biodex.interfaces.controllers.toResponse
-import domain.repositorys.UpdateSpecimenData
-import interfaces.controllers.toResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond

@@ -1,15 +1,18 @@
 package application.services
 
 import domain.models.Specimen
-import domain.repositorys.NewSpecimenData
+import domain.models.NewSpecimenData
 import domain.repositorys.SpecimenRepository
-import domain.repositorys.UpdateSpecimenData
+import domain.models.UpdateSpecimenData
 
 class SpecimenService(
     private val SpecimenRepository: SpecimenRepository
 ) {
     fun findSpecimenById(id: Int): Specimen? {
         return SpecimenRepository.findById(id)
+    }
+    fun findAll(): List<Specimen> {
+        return SpecimenRepository.findAll()
     }
 
     fun createNewSpecimen(data: NewSpecimenData): Specimen {
