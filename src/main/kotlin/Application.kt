@@ -2,14 +2,22 @@ package com.Biodex
 
 import application.services.SpecimenService
 import com.Biodex.application.services.CollectionService
+import com.Biodex.application.services.ExhibitionContentService
+import com.Biodex.application.services.ExhibitionService
 import com.Biodex.application.services.LocationService
 import com.Biodex.application.services.SpecimenImageService
 import com.Biodex.application.services.TaxonomyService
+import com.Biodex.domain.models.renewExhibitionContent
+import com.Biodex.domain.repositorys.ExhibitionContentRepository
 import com.Biodex.infrastructure.persistence.ExposedCollectionRespository
+import com.Biodex.infrastructure.persistence.ExposedExhibitionContentRepository
+import com.Biodex.infrastructure.persistence.ExposedExhibitionrepository
 import com.Biodex.infrastructure.persistence.ExposedLocationRepository
 import com.Biodex.infrastructure.persistence.ExposedSpecimenImageRepository
 import com.Biodex.infrastructure.persistence.ExposedTaxonomyRepository
 import com.Biodex.interfaces.routes.collectionRoutes
+import com.Biodex.interfaces.routes.exhibitionContentRoutes
+import com.Biodex.interfaces.routes.exhibitionRoutes
 import com.Biodex.interfaces.routes.locationRoutes
 import com.Biodex.interfaces.routes.specimenImageRoutes
 import com.Biodex.interfaces.routes.taxonomyRoutes
@@ -46,6 +54,10 @@ fun Application.module() {
     val locationService = LocationService(locationRepository)
     val collectionRepository = ExposedCollectionRespository()
     val collectionService = CollectionService(collectionRepository,specimenRepository)
+    val exhibitionRepository = ExposedExhibitionrepository()
+    val exhibitionContentRepository = ExposedExhibitionContentRepository()
+    val exhibitionService = ExhibitionService(exhibitionRepository, exhibitionContentRepository)
+    val exhibitionContentService = ExhibitionContentService(exhibitionContentRepository)
 
 
 
@@ -55,5 +67,7 @@ fun Application.module() {
         taxonomyRoutes(taxonomyService)
         locationRoutes(locationService)
         collectionRoutes(collectionService)
+        exhibitionRoutes(exhibitionService)
+        exhibitionContentRoutes(exhibitionContentService)
     }
 }
