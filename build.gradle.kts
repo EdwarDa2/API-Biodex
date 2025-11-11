@@ -24,6 +24,7 @@ dependencies {
     implementation("io.ktor:ktor-server-netty")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("io.ktor:ktor-server-config-yaml")
+    implementation("io.ktor:ktor-server-sessions")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
@@ -34,4 +35,6 @@ dependencies {
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.jetbrains.exposed:exposed-core:...")
     implementation("org.jetbrains.exposed:exposed-jdbc:...")
+    implementation("io.ktor:ktor-io:3.3.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-io-core:0.8.0")
 }

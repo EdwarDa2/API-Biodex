@@ -21,36 +21,10 @@ class ExposedCollectionRespository : CollectionRepository {
         println("🔎 Buscando espécimen con ID recibido: $id")
 
         return transaction {
-            try {
-                val row = (CollectionTable leftJoin SpecimensTable)
-                    .selectAll()
-                    .where { CollectionTable.id eq id }
-                    .singleOrNull()
-
-                if (row == null) {
-                    println("❌ La consulta no devolvió nada. Retornando null.")
-                    println("------------------------------------------")
-                    return@transaction null
-                }
-
-                println("✅ Fila encontrada. Mapeando a objeto Specimen...")
-                 CollectionTable
-                    .select { CollectionTable.id eq id }
-                    .map { it.toCollection() }
-
-                val collection = row.toCollection()
-                println("🎉 ¡Mapeo exitoso!")
-                println("------------------------------------------")
-                return@transaction collection
-
-            } catch (e: Exception) { // <-- AÑADIR CATCH
-                println("🚨🚨🚨 ERROR DURANTE EL MAPEO 🚨🚨🚨")
-                println("La excepción fue: ${e.message}") // Imprime el mensaje de error
-                e.printStackTrace() // Imprime el rastro completo del error
-                println("------------------------------------------")
-                return@transaction null // Devuelve null porque hubo un error
-            }
-
+            CollectionTable
+                .select { CollectionTable.id eq id }
+                .singleOrNull()
+                ?.toCollection()
         }
     }
     override fun allCollections(): List<Collection> {
@@ -67,6 +41,7 @@ class ExposedCollectionRespository : CollectionRepository {
                 it[description] = collection.description
                 it[category] = collection.category
                 it[createdAt] = collection.createdAt
+                it[imageUrl] = collection.imageUrl
             } get CollectionTable.id
         }
         return findById(newId)!!
@@ -80,6 +55,7 @@ class ExposedCollectionRespository : CollectionRepository {
                 it[description] = collection.description
                 it[category] = collection.category
                 it[createdAt] = collection.createdAt
+                it[imageUrl] = collection.imageUrl
             }
         }
         return if (updateRow > 0) {
@@ -101,7 +77,8 @@ class ExposedCollectionRespository : CollectionRepository {
             name = this[CollectionTable.name],
             description = this[CollectionTable.description],
             category = this[CollectionTable.category],
-            createdAt = this[CollectionTable.createdAt]
-        )
-    }
+            createdAt = this[CollectionTable.createdAt],
+            imageUrl = this[CollectionTable.imageUrl]
+            )
+        }
 }

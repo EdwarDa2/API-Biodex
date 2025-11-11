@@ -9,26 +9,26 @@ import domain.repositorys.SpecimenRepository
 import kotlin.collections.map
 
 class CollectionService(
-    private val collectionRepository: CollectionRepository,
-    private val specimenRepository: SpecimenRepository
+private val collectionRepository: CollectionRepository,
+private val specimenRepository: SpecimenRepository
 ) {
 
-        fun getCollectionByIdWithSpecimens(id: Int): CollectionResponse? {
-            val collection = collectionRepository.findById(id) ?: return null
+    fun getCollectionByIdWithSpecimens(id: Int): CollectionResponse? {
+        val collection = collectionRepository.findById(id) ?: return null
 
-            val specimens = specimenRepository.findAllByCollectionId(id)
+        val specimens = specimenRepository.findAllByCollectionId(id)
 
-            // Ahora 'specimens' SÍ es una List<Specimen> y el .map funcionará
-            return CollectionResponse(
-                id = collection.id,
-                idManager = collection.idManager,
-                name = collection.name,
-                description = collection.description,
-                category = collection.category,
-                createdAt = collection.createdAt,
-                specimens = specimens?.map { it.toResponse() }!!
-            )
-        }
+        // Ahora 'specimens' SÍ es una List<Specimen> y el .map funcionará
+        return CollectionResponse(
+            id = collection.id,
+            idManager = collection.idManager,
+            name = collection.name,
+            description = collection.description,
+            category = collection.category,
+            createdAt = collection.createdAt,
+            specimens = specimens?.map { it.toResponse() }!!
+        )
+    }
 
     fun getAllCollectionsWithSpecimens(): List<CollectionResponse> {
 
@@ -47,6 +47,7 @@ class CollectionService(
                 idManager = collection.idManager,
                 category = collection.category,
                 createdAt = collection.createdAt,
+                imageUrl = collection.imageUrl,
                 specimens = specimensForThisCollection.map { it.toResponse() }
             )
         }
@@ -62,5 +63,5 @@ class CollectionService(
 
     fun deleteCollection(id: Int): Boolean {
         return collectionRepository.deleteCollection(id)
-    }
+        }
 }

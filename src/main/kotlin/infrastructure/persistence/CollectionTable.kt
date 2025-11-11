@@ -12,5 +12,6 @@ object CollectionTable: Table("collections") {
     val description = varchar("description", 255)
     val category = varchar("category", 255)
     val createdAt = date("created_at")
+    val imageUrl = varchar("image_url", 255).nullable()
     override val primaryKey = PrimaryKey(SpecimensTable.id)
 }

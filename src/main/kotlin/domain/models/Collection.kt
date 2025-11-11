@@ -12,6 +12,7 @@ data class Collection(
     val description: String,
     val category: String,
     val createdAt: LocalDate,
+    val imageUrl: String? = null,
 )
 @Serializable
 data class renewCollection(
@@ -20,4 +21,5 @@ data class renewCollection(
     val description: String,
     val category: String,
     val createdAt: LocalDate,
+    val imageUrl: String?=null,
 )
