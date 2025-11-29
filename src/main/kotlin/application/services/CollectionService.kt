@@ -26,6 +26,8 @@ private val specimenRepository: SpecimenRepository
             description = collection.description,
             category = collection.category,
             createdAt = collection.createdAt,
+            imageUrl  = collection.imageUrl,
+
             specimens = specimens?.map { it.toResponse() }!!
         )
     }
@@ -52,6 +54,7 @@ private val specimenRepository: SpecimenRepository
             )
         }
     }
+
 
     fun createCollection(collection: renewCollection): Collection? {
         return collectionRepository.createCollection(collection)

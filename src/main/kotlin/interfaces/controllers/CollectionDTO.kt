@@ -14,6 +14,7 @@ data class CollectionResponse(
     val description: String,
     val category: String,
     val createdAt : LocalDate,
+    val imageUrl: String?,
     val specimens: List<SpecimenResponse>
 
 )
@@ -60,6 +61,7 @@ fun Collection.toResponse(): CollectionResponse = CollectionResponse(
     description = this.description,
     category = this.category,
     createdAt = this.createdAt,
+    imageUrl = this.imageUrl,
     specimens = emptyList()
 )
 
