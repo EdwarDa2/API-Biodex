@@ -92,7 +92,7 @@ fun Route.specimenRoutes(specimenService: SpecimenService) {
         put("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
 
-            println("▶️ INTENTANDO ACTUALIZAR. ID RECIBIDO: $id")
+            println("▶ INTENTANDO ACTUALIZAR. ID RECIBIDO: $id")
             if (id == null) {
                 call.respond(HttpStatusCode.BadRequest, "Id invalido")
                 return@put
@@ -101,7 +101,7 @@ fun Route.specimenRoutes(specimenService: SpecimenService) {
                 val specimenData = call.receive<UpdateSpecimenData>()
                 val updatedSpecimen = specimenService.updateSpecimen(id, specimenData)
 
-                println("◀️ RESULTADO DEL REPOSITORIO: $updatedSpecimen")
+                println("◀ RESULTADO DEL REPOSITORIO: $updatedSpecimen")
                 if (updatedSpecimen != null) {
                     call.respond(HttpStatusCode.OK, updatedSpecimen.toResponse())
                 } else {

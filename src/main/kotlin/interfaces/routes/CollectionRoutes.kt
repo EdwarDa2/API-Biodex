@@ -129,7 +129,7 @@ fun Route.collectionRoutes(collectionService: CollectionService) {
         put("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
 
-            println("▶️ INTENTANDO ACTUALIZAR. ID RECIBIDO: $id")
+            println("▶ INTENTANDO ACTUALIZAR. ID RECIBIDO: $id")
             if (id == null) {
                 call.respond(HttpStatusCode.BadRequest, "Id inválido")
                 return@put
@@ -187,7 +187,7 @@ fun Route.collectionRoutes(collectionService: CollectionService) {
                 )
                 val updateCollection = collectionService.updateCollection(id, collectionData)
 
-                println("◀️ RESULTADO DEL REPOSITORIO: $updateCollection")
+                println("◀ RESULTADO DEL REPOSITORIO: $updateCollection")
                 if (updateCollection != null) {
                     call.respond(HttpStatusCode.OK, updateCollection.toResponse())
                 } else {
@@ -213,6 +213,6 @@ fun Route.collectionRoutes(collectionService: CollectionService) {
             } else {
                 call.respond(HttpStatusCode.NotFound)
             }
+            }
         }
-    }
 }
