@@ -10,5 +10,6 @@ interface ExhibitionContentRepository {
     fun updateExhibitionContent(id: Int, content: renewExhibitionContent): ExhibitionContent?
     fun deleteAllByExhibitionId(id: Int)
     fun delete(id: Int): Boolean
+    fun getExhibitionContentByExhibitionId(exhibitionId: Int): List<ExhibitionContent>
 
 }

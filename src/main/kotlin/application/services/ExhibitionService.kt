@@ -10,7 +10,8 @@ class ExhibitionService (
     private val contentRepository: ExhibitionContentRepository
 ){
     fun getExhibitionId(id: Int): Exhibition?{
-        return exhibitionRepository.getExhibitionId(id)
+        val exhibition = exhibitionRepository.getExhibitionId(id)
+        return exhibition?.copy(content = contentRepository.getExhibitionContentByExhibitionId(id))
     }
     fun crateExhibition(exhibition: renewExhibition): Exhibition?{
         return exhibitionRepository.crateExhibition(exhibition)
@@ -23,5 +24,8 @@ class ExhibitionService (
         contentRepository.deleteAllByExhibitionId(id)
 
         return exhibitionRepository.deleteExhibition(id)
+    }
+    fun getExhibitionsByManagerId(idManager: Int): List<Exhibition> {
+        return exhibitionRepository.getExhibitionsByManagerId(idManager)
     }
 }

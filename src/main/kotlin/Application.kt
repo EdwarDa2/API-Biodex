@@ -21,9 +21,10 @@ import com.Biodex.interfaces.routes.exhibitionRoutes
 import com.Biodex.interfaces.routes.locationRoutes
 import com.Biodex.interfaces.routes.specimenImageRoutes
 import com.Biodex.interfaces.routes.taxonomyRoutes
+import com.Biodex.interfaces.routes.uploadRoutes
 import infrastructure.config.DatabaseFactory
 import infrastructure.persistence.ExposedSpecimenRepository
-import interfaces.routes.specimenRoutes
+import com.Biodex.interfaces.routes.specimenRoutes
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.serialization.kotlinx.json.*
@@ -86,6 +87,7 @@ fun Application.module() {
         collectionRoutes(collectionService)
         exhibitionRoutes(exhibitionService)
         exhibitionContentRoutes(exhibitionContentService)
+        uploadRoutes()
 
         staticFiles(remotePath = "/uploads", dir = File("uploads"))
         }

@@ -33,8 +33,7 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.3")
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:${exposed_version}")
     implementation("com.zaxxer:HikariCP:5.1.0")
-    implementation("org.jetbrains.exposed:exposed-core:...")
-    implementation("org.jetbrains.exposed:exposed-jdbc:...")
+
     implementation("io.ktor:ktor-io:3.3.0")
     implementation("org.jetbrains.kotlinx:kotlinx-io-core:0.8.0")
 }

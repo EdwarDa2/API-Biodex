@@ -11,6 +11,8 @@ data class Exhibition(
     val description: String,
     val category: String,
     val createdAt: LocalDate,
+    val coverImageUrl: String?,
+    val content: List<ExhibitionContent>
 )
 @Serializable
 data class renewExhibition(
@@ -18,5 +20,6 @@ data class renewExhibition(
     val title: String,
     val description: String,
     val category: String,
-    val createdAt: LocalDate
+    val createdAt: LocalDate,
+    val coverImageUrl: String?
 )

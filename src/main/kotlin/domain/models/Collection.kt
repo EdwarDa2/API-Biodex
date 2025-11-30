@@ -21,5 +21,5 @@ data class renewCollection(
     val description: String,
     val category: String,
     val createdAt: LocalDate,
-    val imageUrl: String?=null,
+    val imageUrl: String? = null,
 )

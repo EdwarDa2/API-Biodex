@@ -10,6 +10,7 @@ data class ExhibitionContent(
     val contentType: String,
     val textContent: String?,
     val imageUrl: String?,
+    val imageDescription: String?,
     val displayOrder: Int
 )
 @Serializable
@@ -18,5 +19,6 @@ data class renewExhibitionContent(
     val contentType: String,
     val textContent: String?,
     val imageUrl: String?,
+    val imageDescription: String?,
     val displayOrder: Int
 )

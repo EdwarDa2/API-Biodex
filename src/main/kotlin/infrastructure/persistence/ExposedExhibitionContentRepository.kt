@@ -48,8 +48,9 @@ class ExposedExhibitionContentRepository : ExhibitionContentRepository {
             ExhibitionContentTable.insert {
                 it[idExhibition] = content.idExhibition
                 it[contentType] = content.contentType
-                it[textContent] = content.textContent
+                it[ExhibitionContentTable.textContent] = content.textContent
                 it[imageUrl] = content.imageUrl
+                it[ExhibitionContentTable.imageDescription] = content.imageDescription
                 it[displayOrder] = content.displayOrder
             } get ExhibitionContentTable.id
         }
@@ -61,8 +62,9 @@ class ExposedExhibitionContentRepository : ExhibitionContentRepository {
             ExhibitionContentTable.update({ ExhibitionContentTable.id eq id }) {
                 it[idExhibition] = content.idExhibition
                 it[contentType] = content.contentType
-                it[textContent] = content.textContent
+                it[ExhibitionContentTable.textContent] = content.textContent
                 it[imageUrl] = content.imageUrl
+                it[ExhibitionContentTable.imageDescription] = content.imageDescription
                 it[displayOrder] = content.displayOrder
             }
         }
@@ -86,6 +88,15 @@ class ExposedExhibitionContentRepository : ExhibitionContentRepository {
         }
     }
 
+    override fun getExhibitionContentByExhibitionId(exhibitionId: Int): List<ExhibitionContent> {
+        return transaction {
+            ExhibitionContentTable
+                .select { ExhibitionContentTable.idExhibition eq exhibitionId }
+                .orderBy(ExhibitionContentTable.displayOrder)
+                .map { it.toExhibitionContent() }
+        }
+    }
+
 }
 public fun ResultRow.toExhibitionContent(): ExhibitionContent = ExhibitionContent(
     id = this[ExhibitionContentTable.id],
@@ -93,5 +104,6 @@ public fun ResultRow.toExhibitionContent(): ExhibitionContent = ExhibitionConten
     contentType = this[ExhibitionContentTable.contentType],
     textContent = this[ExhibitionContentTable.textContent],
     imageUrl = this[ExhibitionContentTable.imageUrl],
+    imageDescription = this[ExhibitionContentTable.imageDescription],
     displayOrder = this[ExhibitionContentTable.displayOrder],
 )

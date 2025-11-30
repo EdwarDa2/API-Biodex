@@ -8,4 +8,5 @@ interface ExhibitionRepository {
     fun crateExhibition(exhibition: renewExhibition): Exhibition?
     fun updateExhibition(id: Int,exhibition: renewExhibition): Exhibition?
     fun deleteExhibition(id: Int):Boolean
+    fun getExhibitionsByManagerId(idManager: Int): List<Exhibition>
 }

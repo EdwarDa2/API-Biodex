@@ -31,6 +31,17 @@ fun Route.exhibitionRoutes(exhibitionService: ExhibitionService) {
                 call.respond(HttpStatusCode.NotFound)
             }
         }
+
+        get("manager/{idManager}") {
+            val idManager = call.parameters["idManager"]?.toIntOrNull()
+            if (idManager == null) {
+                call.respond(HttpStatusCode.BadRequest, "ID de Manager inválido.")
+                return@get
+            }
+            val exhibitions = exhibitionService.getExhibitionsByManagerId(idManager)
+            call.respond(HttpStatusCode.OK, exhibitions)
+        }
+
         post {
             try {
                 val exhibitionData = call.receive<renewExhibition>()

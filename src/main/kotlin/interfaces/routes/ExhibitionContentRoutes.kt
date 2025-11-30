@@ -17,7 +17,7 @@ import io.ktor.server.routing.route
 import kotlin.text.toIntOrNull
 
 fun Route.exhibitionContentRoutes(exhibitionContentService: ExhibitionContentService) {
-    route("/exhibition_content") {
+    route("/exhibitionContent") {
         get("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id == null) {

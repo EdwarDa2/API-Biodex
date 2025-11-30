@@ -1,4 +1,4 @@
-package interfaces.routes
+package com.Biodex.interfaces.routes
 
 import application.services.SpecimenService
 import domain.models.NewSpecimenData
@@ -8,7 +8,9 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-
+import io.ktor.http.content.*
+import java.io.File
+import java.util.UUID
 
 fun Route.specimenRoutes(specimenService: SpecimenService) {
     route("/specimens") {
@@ -32,12 +34,59 @@ fun Route.specimenRoutes(specimenService: SpecimenService) {
             }
         }
         post {
+            val multipart = call.receiveMultipart()
+            var mainPhotoPath: String? = null
+            val formFields = mutableMapOf<String, String>()
+
+            multipart.forEachPart { part ->
+                when (part) {
+                    is PartData.FileItem -> {
+                        if (part.name == "mainPhoto") {
+                            val fileName = part.originalFileName ?: "random_file_name"
+                            val fileExtension = fileName.substringAfterLast('.', "")
+                            val uniqueFileName = "${UUID.randomUUID()}.$fileExtension"
+                            val uploadDir = File("uploads/specimens")
+                            if (!uploadDir.exists()) {
+                                uploadDir.mkdirs()
+                            }
+                            val file = File(uploadDir, uniqueFileName)
+                            part.streamProvider().use { input ->
+                                file.outputStream().buffered().use { output ->
+                                    input.copyTo(output)
+                                }
+                            }
+                            mainPhotoPath = "/uploads/specimens/$uniqueFileName"
+                        }
+                    }
+                    is PartData.FormItem -> {
+                        formFields[part.name!!] = part.value
+                    }
+                    else -> part.dispose()
+                }
+                part.dispose()
+            }
+
             try {
-                val specimenData = call.receive<NewSpecimenData>()
+                val specimenData = NewSpecimenData(
+                    idCollection = formFields["idCollection"]?.toInt() ?: throw IllegalArgumentException("idCollection is missing"),
+                    commonName = formFields["commonName"] ?: throw IllegalArgumentException("commonName is missing"),
+                    idTaxonomy = formFields["idTaxonomy"]?.toInt() ?: throw IllegalArgumentException("idTaxonomy is missing"),
+                    collectionDate = kotlinx.datetime.LocalDate.parse(formFields["collectionDate"] ?: throw IllegalArgumentException("collectionDate is missing")),
+                    mainPhoto = mainPhotoPath,
+                    collector = formFields["collector"] ?: throw IllegalArgumentException("collector is missing"),
+                    idLocation = formFields["idLocation"]?.toInt() ?: throw IllegalArgumentException("idLocation is missing"),
+                    individualsCount = formFields["individualsCount"]?.toInt() ?: throw IllegalArgumentException("individualsCount is missing"),
+                    determinationYear = formFields["determinationYear"]?.toInt() ?: throw IllegalArgumentException("determinationYear is missing"),
+                    determinador = formFields["determinador"] ?: throw IllegalArgumentException("determinador is missing"),
+                    sex = formFields["sex"] ?: throw IllegalArgumentException("sex is missing"),
+                    vegetationType = formFields["vegetationType"] ?: throw IllegalArgumentException("vegetationType is missing"),
+                    collectionMethod = formFields["collectionMethod"] ?: throw IllegalArgumentException("collectionMethod is missing"),
+                    notes = formFields["notes"]
+                )
                 val newSpecimen = specimenService.createNewSpecimen(specimenData)
                 call.respond(HttpStatusCode.Created, "New specimen creada: ${newSpecimen.id}")
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, "Datos invaldos: ${e.localizedMessage}")
+                call.respond(HttpStatusCode.InternalServerError, "Error al crear espécimen: ${e.localizedMessage}")
             }
         }
         put("{id}") {

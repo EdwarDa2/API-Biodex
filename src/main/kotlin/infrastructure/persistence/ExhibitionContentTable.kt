@@ -8,6 +8,8 @@ object ExhibitionContentTable :  Table("exhibition_content") {
     val contentType = varchar("content_type", 50)
     val textContent = varchar("text_content", 255).nullable()
     val imageUrl = varchar("image_url", 255).nullable()
+    val imageDescription = varchar("image_description", 255).nullable()
     val displayOrder = integer("display_order")
+
     override val primaryKey = PrimaryKey(id)
 }

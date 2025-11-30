@@ -11,6 +11,9 @@ class ExhibitionContentService (
         return exhibitionContentRepository.getExhibitionContentId(id)
     }
     fun createExhibitionContent(content: renewExhibitionContent): ExhibitionContent?{
+        if (content.contentType == "TEXT" && content.textContent == null) {
+            throw IllegalArgumentException("textContent no puede ser nulo cuando contentType es TEXT")
+        }
         return exhibitionContentRepository.createExhibitionContent(content)
     }
     fun updateExhibitionContent(id: Int,content: renewExhibitionContent): ExhibitionContent? {
