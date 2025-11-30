@@ -11,6 +11,24 @@ import io.ktor.server.routing.*
 import io.ktor.http.content.*
 import java.io.File
 import java.util.UUID
+import kotlinx.datetime.LocalDate
+
+// Helper function to save image files
+suspend fun saveImageFile(part: PartData.FileItem, uploadDir: File): String {
+    val fileName = part.originalFileName ?: "random_file_name"
+    val fileExtension = fileName.substringAfterLast('.', "")
+    val uniqueFileName = "${UUID.randomUUID()}.$fileExtension"
+    if (!uploadDir.exists()) {
+        uploadDir.mkdirs()
+    }
+    val file = File(uploadDir, uniqueFileName)
+    part.streamProvider().use { input ->
+        file.outputStream().buffered().use { output ->
+            input.copyTo(output)
+        }
+    }
+    return "/uploads/specimens/$uniqueFileName"
+}
 
 fun Route.specimenRoutes(specimenService: SpecimenService) {
     route("/specimens") {
@@ -36,26 +54,18 @@ fun Route.specimenRoutes(specimenService: SpecimenService) {
         post {
             val multipart = call.receiveMultipart()
             var mainPhotoPath: String? = null
+            val additionalPhotoPaths = mutableListOf<String>()
             val formFields = mutableMapOf<String, String>()
+            val uploadDir = File("uploads/specimens")
 
             multipart.forEachPart { part ->
                 when (part) {
                     is PartData.FileItem -> {
-                        if (part.name == "mainPhoto") {
-                            val fileName = part.originalFileName ?: "random_file_name"
-                            val fileExtension = fileName.substringAfterLast('.', "")
-                            val uniqueFileName = "${UUID.randomUUID()}.$fileExtension"
-                            val uploadDir = File("uploads/specimens")
-                            if (!uploadDir.exists()) {
-                                uploadDir.mkdirs()
+                        when (part.name) {
+                            "mainPhoto" -> mainPhotoPath = saveImageFile(part, uploadDir)
+                            "additionalPhoto1", "additionalPhoto2", "additionalPhoto3", "additionalPhoto4", "additionalPhoto5", "additionalPhoto6" -> {
+                                additionalPhotoPaths.add(saveImageFile(part, uploadDir))
                             }
-                            val file = File(uploadDir, uniqueFileName)
-                            part.streamProvider().use { input ->
-                                file.outputStream().buffered().use { output ->
-                                    input.copyTo(output)
-                                }
-                            }
-                            mainPhotoPath = "/uploads/specimens/$uniqueFileName"
                         }
                     }
                     is PartData.FormItem -> {
@@ -71,7 +81,7 @@ fun Route.specimenRoutes(specimenService: SpecimenService) {
                     idCollection = formFields["idCollection"]?.toInt() ?: throw IllegalArgumentException("idCollection is missing"),
                     commonName = formFields["commonName"] ?: throw IllegalArgumentException("commonName is missing"),
                     idTaxonomy = formFields["idTaxonomy"]?.toInt() ?: throw IllegalArgumentException("idTaxonomy is missing"),
-                    collectionDate = kotlinx.datetime.LocalDate.parse(formFields["collectionDate"] ?: throw IllegalArgumentException("collectionDate is missing")),
+                    collectionDate = LocalDate.parse(formFields["collectionDate"] ?: throw IllegalArgumentException("collectionDate is missing")),
                     mainPhoto = mainPhotoPath,
                     collector = formFields["collector"] ?: throw IllegalArgumentException("collector is missing"),
                     idLocation = formFields["idLocation"]?.toInt() ?: throw IllegalArgumentException("idLocation is missing"),
@@ -81,7 +91,13 @@ fun Route.specimenRoutes(specimenService: SpecimenService) {
                     sex = formFields["sex"] ?: throw IllegalArgumentException("sex is missing"),
                     vegetationType = formFields["vegetationType"] ?: throw IllegalArgumentException("vegetationType is missing"),
                     collectionMethod = formFields["collectionMethod"] ?: throw IllegalArgumentException("collectionMethod is missing"),
-                    notes = formFields["notes"]
+                    notes = formFields["notes"],
+                    additionalPhoto1 = additionalPhotoPaths.getOrNull(0),
+                    additionalPhoto2 = additionalPhotoPaths.getOrNull(1),
+                    additionalPhoto3 = additionalPhotoPaths.getOrNull(2),
+                    additionalPhoto4 = additionalPhotoPaths.getOrNull(3),
+                    additionalPhoto5 = additionalPhotoPaths.getOrNull(4),
+                    additionalPhoto6 = additionalPhotoPaths.getOrNull(5)
                 )
                 val newSpecimen = specimenService.createNewSpecimen(specimenData)
                 call.respond(HttpStatusCode.Created, "New specimen creada: ${newSpecimen.id}")
@@ -91,25 +107,67 @@ fun Route.specimenRoutes(specimenService: SpecimenService) {
         }
         put("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
-
-            println("▶ INTENTANDO ACTUALIZAR. ID RECIBIDO: $id")
             if (id == null) {
-                call.respond(HttpStatusCode.BadRequest, "Id invalido")
+                call.respond(HttpStatusCode.BadRequest, "ID de espécimen inválido.")
                 return@put
             }
+
+            val multipart = call.receiveMultipart()
+            var mainPhotoPath: String? = null
+            val additionalPhotoPaths = mutableListOf<String>()
+            val formFields = mutableMapOf<String, String>()
+            val uploadDir = File("uploads/specimens")
+
+            multipart.forEachPart { part ->
+                when (part) {
+                    is PartData.FileItem -> {
+                        when (part.name) {
+                            "mainPhoto" -> mainPhotoPath = saveImageFile(part, uploadDir)
+                            "additionalPhoto1", "additionalPhoto2", "additionalPhoto3", "additionalPhoto4", "additionalPhoto5", "additionalPhoto6" -> {
+                                additionalPhotoPaths.add(saveImageFile(part, uploadDir))
+                            }
+                        }
+                    }
+                    is PartData.FormItem -> {
+                        formFields[part.name!!] = part.value
+                    }
+                    else -> part.dispose()
+                }
+                part.dispose()
+            }
+
             try {
-                val specimenData = call.receive<UpdateSpecimenData>()
+                val specimenData = UpdateSpecimenData(
+                    idCollection = formFields["idCollection"]?.toInt(),
+                    commonName = formFields["commonName"],
+                    idTaxonomy = formFields["idTaxonomy"]?.toInt(),
+                    collectionDate = formFields["collectionDate"]?.let { LocalDate.parse(it) },
+                    mainPhoto = mainPhotoPath,
+                    collector = formFields["collector"],
+                    idLocation = formFields["idLocation"]?.toInt(),
+                    individualsCount = formFields["individualsCount"]?.toInt(),
+                    determinationYear = formFields["determinationYear"]?.toInt(),
+                    determinador = formFields["determinador"],
+                    sex = formFields["sex"],
+                    vegetationType = formFields["vegetationType"],
+                    collectionMethod = formFields["collectionMethod"],
+                    notes = formFields["notes"],
+                    additionalPhoto1 = additionalPhotoPaths.getOrNull(0),
+                    additionalPhoto2 = additionalPhotoPaths.getOrNull(1),
+                    additionalPhoto3 = additionalPhotoPaths.getOrNull(2),
+                    additionalPhoto4 = additionalPhotoPaths.getOrNull(3),
+                    additionalPhoto5 = additionalPhotoPaths.getOrNull(4),
+                    additionalPhoto6 = additionalPhotoPaths.getOrNull(5)
+                )
                 val updatedSpecimen = specimenService.updateSpecimen(id, specimenData)
 
-                println("◀ RESULTADO DEL REPOSITORIO: $updatedSpecimen")
                 if (updatedSpecimen != null) {
                     call.respond(HttpStatusCode.OK, updatedSpecimen.toResponse())
                 } else {
-                    println("❌ NO SE ENCONTRÓ EL ID $id. ENVIANDO 404.")
                     call.respond(HttpStatusCode.NotFound)
                 }
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "Datos invaldos: ${e.localizedMessage}")
+                call.respond(HttpStatusCode.InternalServerError, "Error al actualizar espécimen: ${e.localizedMessage}")
             }
         }
         delete("{id}") {

@@ -23,7 +23,12 @@ data class SpecimenResponse(
     val collectionMethod: String,
     val notes: String?,
     val scientificName: String,
-    val images: List<SpecimenImage>
+    val additionalPhoto1: String?,
+    val additionalPhoto2: String?,
+    val additionalPhoto3: String?,
+    val additionalPhoto4: String?,
+    val additionalPhoto5: String?,
+    val additionalPhoto6: String?
 )
 
 fun Specimen.toResponse(): SpecimenResponse {
@@ -41,6 +46,11 @@ fun Specimen.toResponse(): SpecimenResponse {
         collectionMethod = this.collectionMethod,
         notes = this.notes,
         scientificName = "${this.taxonomy.genus} ${this.taxonomy.species}",
-        images = this.images
+        additionalPhoto1 = this.additionalPhoto1,
+        additionalPhoto2 = this.additionalPhoto2,
+        additionalPhoto3 = this.additionalPhoto3,
+        additionalPhoto4 = this.additionalPhoto4,
+        additionalPhoto5 = this.additionalPhoto5,
+        additionalPhoto6 = this.additionalPhoto6
     )
 }
