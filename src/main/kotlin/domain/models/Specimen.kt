@@ -23,7 +23,12 @@ data class Specimen(
      val collectionMethod: String,
      val notes: String?,
      val taxonomy: Taxonomy,
-     val images: List<SpecimenImage>
+     val additionalPhoto1: String?,
+     val additionalPhoto2: String?,
+     val additionalPhoto3: String?,
+     val additionalPhoto4: String?,
+     val additionalPhoto5: String?,
+     val additionalPhoto6: String?
 )
 @Serializable
 data class NewSpecimenData(
@@ -40,22 +45,32 @@ data class NewSpecimenData(
      val sex: String,
      val vegetationType: String,
      val collectionMethod: String,
-     val notes: String?
-)
+     val notes: String?,
+     val additionalPhoto1: String? = null,
+     val additionalPhoto2: String? = null,
+     val additionalPhoto3: String? = null,
+     val additionalPhoto4: String? = null,
+     val additionalPhoto5: String? = null,
+     val additionalPhoto6: String? = null)
 @Serializable
 data class UpdateSpecimenData(
-     val idCollection: Int,
-     val commonName: String,
-     val idTaxonomy: Int,
-     val collectionDate: LocalDate,
+     val idCollection: Int?,
+     val commonName: String?,
+     val idTaxonomy: Int?,
+     val collectionDate: LocalDate?,
      val mainPhoto: String?,
-     val collector: String,
-     val idLocation: Int,
-     val individualsCount: Int,
-     val determinationYear: Int,
-     val determinador: String,
-     val sex: String,
-     val vegetationType: String,
-     val collectionMethod: String,
-     val notes: String?
-)
+     val collector: String?,
+     val idLocation: Int?,
+     val individualsCount: Int?,
+     val determinationYear: Int?,
+     val determinador: String?,
+     val sex: String?,
+     val vegetationType: String?,
+     val collectionMethod: String?,
+     val notes: String?,
+     val additionalPhoto1: String? = null,
+     val additionalPhoto2: String? = null,
+     val additionalPhoto3: String? = null,
+     val additionalPhoto4: String? = null,
+     val additionalPhoto5: String? = null,
+     val additionalPhoto6: String? = null)

@@ -36,12 +36,7 @@ class ExposedSpecimenRepository : SpecimenRepository {
                 }
 
                 println("✅ Fila encontrada. Mapeando a objeto Specimen...")
-                // Busca las imágenes por separado
-                val images = SpecimenImagesTable
-                    .select { SpecimenImagesTable.idSpecimen eq id }
-                    .map { it.toSpecimenImage() } // Llama al mapper de imágenes
-
-                val specimen = row.toSpecimen(images) // Llama al mapper principal
+                val specimen = row.toSpecimen() // Llama al mapper principal
                 println("🎉 ¡Mapeo exitoso!")
                 println("------------------------------------------")
                 return@transaction specimen // Devuelve el objeto creado
@@ -67,18 +62,9 @@ class ExposedSpecimenRepository : SpecimenRepository {
                 return@transaction emptyList()
             }
 
-            // 2. Trae las imágenes SÓLO de esos especímenes
-            val specimenIds = specimenRows.map { it[SpecimensTable.id] }
-            val imagesBySpecimenId = SpecimenImagesTable
-                .select { SpecimenImagesTable.idSpecimen inList specimenIds }
-                .map { it.toSpecimenImage() }
-                .groupBy { it.idSpecimen }
-
             // 3. Ensambla los especímenes con sus imágenes
             specimenRows.map { row ->
-                val specimenId = row[SpecimensTable.id]
-                val images = imagesBySpecimenId[specimenId] ?: emptyList()
-                row.toSpecimen(images) // Usa tu mapeador 'toSpecimen'
+                row.toSpecimen() // Usa tu mapeador 'toSpecimen'
             }
         }
     }
@@ -86,21 +72,12 @@ class ExposedSpecimenRepository : SpecimenRepository {
     override fun findAll(): List<Specimen> {
         return transaction {
 
-            val allImages = SpecimenImagesTable
-                .selectAll()
-                .map { it.toSpecimenImage() }
-                .groupBy { it.idSpecimen }
-
-
             val specimenRows = (SpecimensTable leftJoin TaxonomyTable leftJoin LocationTable)
                 .selectAll()
                 .toList()
 
             specimenRows.map { row ->
-                val specimenId = row[SpecimensTable.id]
-                val imagesForThisSpecimen = allImages[specimenId] ?: emptyList()
-
-                row.toSpecimen(imagesForThisSpecimen)
+                row.toSpecimen()
             }
         }
     }
@@ -122,6 +99,12 @@ class ExposedSpecimenRepository : SpecimenRepository {
                 it[vegetationType] = specimenData.vegetationType
                 it[collectionMethod] = specimenData.collectionMethod
                 it[notes] = specimenData.notes
+                it[additionalPhoto1] = specimenData.additionalPhoto1
+                it[additionalPhoto2] = specimenData.additionalPhoto2
+                it[additionalPhoto3] = specimenData.additionalPhoto3
+                it[additionalPhoto4] = specimenData.additionalPhoto4
+                it[additionalPhoto5] = specimenData.additionalPhoto5
+                it[additionalPhoto6] = specimenData.additionalPhoto6
             } get SpecimensTable.id
         }
         return findById(newId)!!
@@ -130,20 +113,26 @@ class ExposedSpecimenRepository : SpecimenRepository {
     override fun update(id: Int, specimenData: UpdateSpecimenData): Specimen? {
         val updatedRows = transaction {
             SpecimensTable.update({ SpecimensTable.id eq id }) {
-                it[idCollection] = specimenData.idCollection
-                it[commonName] = specimenData.commonName
-                it[idTaxonomy] = specimenData.idTaxonomy
-                it[collectionDate] = specimenData.collectionDate
-                it[mainPhoto] = specimenData.mainPhoto
-                it[collector] = specimenData.collector
-                it[idLocation] = specimenData.idLocation
-                it[individualsCount] = specimenData.individualsCount
-                it[determinationYear] = specimenData.determinationYear
-                it[determinador] = specimenData.determinador
-                it[sex] = specimenData.sex
-                it[vegetationType] = specimenData.vegetationType
-                it[collectionMethod] = specimenData.collectionMethod
-                it[notes] = specimenData.notes
+                specimenData.idCollection?.let { idCollection -> it[SpecimensTable.idCollection] = idCollection }
+                specimenData.commonName?.let { commonName -> it[SpecimensTable.commonName] = commonName }
+                specimenData.idTaxonomy?.let { idTaxonomy -> it[SpecimensTable.idTaxonomy] = idTaxonomy }
+                specimenData.collectionDate?.let { collectionDate -> it[SpecimensTable.collectionDate] = collectionDate }
+                specimenData.mainPhoto?.let { mainPhoto -> it[SpecimensTable.mainPhoto] = mainPhoto }
+                specimenData.collector?.let { collector -> it[SpecimensTable.collector] = collector }
+                specimenData.idLocation?.let { idLocation -> it[SpecimensTable.idLocation] = idLocation }
+                specimenData.individualsCount?.let { individualsCount -> it[SpecimensTable.individualsCount] = individualsCount }
+                specimenData.determinationYear?.let { determinationYear -> it[SpecimensTable.determinationYear] = determinationYear }
+                specimenData.determinador?.let { determinador -> it[SpecimensTable.determinador] = determinador }
+                specimenData.sex?.let { sex -> it[SpecimensTable.sex] = sex }
+                specimenData.vegetationType?.let { vegetationType -> it[SpecimensTable.vegetationType] = vegetationType }
+                specimenData.collectionMethod?.let { collectionMethod -> it[SpecimensTable.collectionMethod] = collectionMethod }
+                specimenData.notes?.let { notes -> it[SpecimensTable.notes] = notes }
+                specimenData.additionalPhoto1?.let { additionalPhoto1 -> it[SpecimensTable.additionalPhoto1] = additionalPhoto1 }
+                specimenData.additionalPhoto2?.let { additionalPhoto2 -> it[SpecimensTable.additionalPhoto2] = additionalPhoto2 }
+                specimenData.additionalPhoto3?.let { additionalPhoto3 -> it[SpecimensTable.additionalPhoto3] = additionalPhoto3 }
+                specimenData.additionalPhoto4?.let { additionalPhoto4 -> it[SpecimensTable.additionalPhoto4] = additionalPhoto4 }
+                specimenData.additionalPhoto5?.let { additionalPhoto5 -> it[SpecimensTable.additionalPhoto5] = additionalPhoto5 }
+                specimenData.additionalPhoto6?.let { additionalPhoto6 -> it[SpecimensTable.additionalPhoto6] = additionalPhoto6 }
             }
         }
         return if (updatedRows > 0) {
@@ -167,7 +156,7 @@ class ExposedSpecimenRepository : SpecimenRepository {
         displayOrder = this[SpecimenImagesTable.displayOrder]
     )
 }
-public fun ResultRow.toSpecimen(images: List<SpecimenImage>): Specimen = Specimen(
+public fun ResultRow.toSpecimen(): Specimen = Specimen(
     id = this[SpecimensTable.id],
     idCollection = this[SpecimensTable.idCollection],
     commonName = this[SpecimensTable.commonName],
@@ -183,6 +172,11 @@ public fun ResultRow.toSpecimen(images: List<SpecimenImage>): Specimen = Specime
     notes = this[SpecimensTable.notes],
     taxonomy = this.toTaxonomy(),
     location = this.toLocation(),
-    images = images
+    additionalPhoto1 = this[SpecimensTable.additionalPhoto1],
+    additionalPhoto2 = this[SpecimensTable.additionalPhoto2],
+    additionalPhoto3 = this[SpecimensTable.additionalPhoto3],
+    additionalPhoto4 = this[SpecimensTable.additionalPhoto4],
+    additionalPhoto5 = this[SpecimensTable.additionalPhoto5],
+    additionalPhoto6 = this[SpecimensTable.additionalPhoto6]
 )
 

@@ -23,5 +23,11 @@ object SpecimensTable : Table("specimens") {
     val vegetationType = varchar("vegetation_type", 255)
     val collectionMethod = varchar("collection_method", 255)
     val notes = text("notes").nullable()
+    val additionalPhoto1 = varchar("additional_photo1", 1024).nullable()
+    val additionalPhoto2 = varchar("additional_photo2", 1024).nullable()
+    val additionalPhoto3 = varchar("additional_photo3", 1024).nullable()
+    val additionalPhoto4 = varchar("additional_photo4", 1024).nullable()
+    val additionalPhoto5 = varchar("additional_photo5", 1024).nullable()
+    val additionalPhoto6 = varchar("additional_photo6", 1024).nullable()
     override val primaryKey = PrimaryKey(id)
 }

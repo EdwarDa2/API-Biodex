@@ -77,7 +77,7 @@ class ExposedExhibitionContentRepository : ExhibitionContentRepository {
 
     override fun deleteAllByExhibitionId(id: Int) {
         return transaction {
-            ExhibitionContentTable.deleteWhere { ExhibitionContentTable.id eq id } > 0
+            ExhibitionContentTable.deleteWhere { ExhibitionContentTable.idExhibition eq id } > 0
         }
     }
 
