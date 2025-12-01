@@ -2,36 +2,36 @@ package com.Biodex.interfaces.routes
 
 import com.Biodex.application.services.ExhibitionService
 import com.Biodex.domain.models.renewExhibition
-import com.Biodex.domain.models.renewExhibitionContent
+import com.Biodex.interfaces.controllers.CreateExhibitionRequest
 import com.Biodex.interfaces.controllers.toResponse
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.request.receive
-import io.ktor.server.response.respond
-import io.ktor.server.routing.Route
-import io.ktor.server.routing.delete
-import io.ktor.server.routing.get
-import io.ktor.server.routing.post
-import io.ktor.server.routing.put
-import io.ktor.server.routing.route
-import kotlin.text.toIntOrNull
+import io.ktor.server.application.* // Importante para call
+import io.ktor.server.request.* // Importante para receive
+import io.ktor.server.response.* // Importante para respond
+import io.ktor.server.routing.*
+import kotlinx.datetime.LocalDate
 
 fun Route.exhibitionRoutes(exhibitionService: ExhibitionService) {
+
     route("/exhibitions") {
+
+        // GET por ID
         get("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id == null) {
-                call.respond(HttpStatusCode.BadRequest, "ID  inválido.")
+                call.respond(HttpStatusCode.BadRequest, "ID inválido.")
                 return@get
             }
-            val exhibition = exhibitionService.getExhibitionId(id) ?: return@get
+            val exhibition = exhibitionService.getExhibitionId(id)
 
             if (exhibition != null) {
-                call.respond(HttpStatusCode.OK, exhibition)
+                call.respond(HttpStatusCode.OK, exhibition.toResponse())
             } else {
                 call.respond(HttpStatusCode.NotFound)
             }
         }
 
+        // GET por Manager
         get("manager/{idManager}") {
             val idManager = call.parameters["idManager"]?.toIntOrNull()
             if (idManager == null) {
@@ -39,50 +39,90 @@ fun Route.exhibitionRoutes(exhibitionService: ExhibitionService) {
                 return@get
             }
             val exhibitions = exhibitionService.getExhibitionsByManagerId(idManager)
-            call.respond(HttpStatusCode.OK, exhibitions)
+            // Mapeamos la lista a DTOs de respuesta
+            call.respond(HttpStatusCode.OK, exhibitions.map { it.toResponse() })
         }
 
+        // POST (CREAR) - AQUÍ ESTÁ LA MAGIA NUEVA
         post {
             try {
-                val exhibitionData = call.receive<renewExhibition>()
+                // 1. Recibimos el DTO de Angular (JSON con Strings)
+                val request = call.receive<CreateExhibitionRequest>()
+
+                // 2. Convertimos la fecha String a LocalDate
+                // Angular manda "YYYY-MM-DD", LocalDate.parse lo entiende directo
+                val parsedDate = LocalDate.parse(request.createdAt)
+
+                // 3. Construimos el objeto que tu servicio necesita (renewExhibition)
+                // Asegúrate que 'renewExhibition' tenga el campo 'imageUrl'
+                val exhibitionData = renewExhibition(
+                    idManager = request.idManager,
+                    title = request.title,
+                    description = request.description,
+                    category = request.category,
+                    createdAt = parsedDate,
+                    coverImageUrl = request.coverImageUrl
+                )
+
+                // 4. Llamamos al servicio
                 val newExhibition = exhibitionService.crateExhibition(exhibitionData)
-                call.respond(HttpStatusCode.Created, "Contemnido Guardo: ${newExhibition?.id}")
+
+                // 5. Respondemos con el objeto JSON (Angular leerá el ID de aquí)
+                if (newExhibition != null) {
+                    call.respond(HttpStatusCode.Created, newExhibition.toResponse())
+                } else {
+                    call.respond(HttpStatusCode.InternalServerError, "Error al crear la exposición.")
+                }
+
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, "Datos invaldos: ${e.localizedMessage}")
+                e.printStackTrace()
+                call.respond(HttpStatusCode.BadRequest, "Datos inválidos: ${e.localizedMessage}")
             }
         }
+
+        // PUT (ACTUALIZAR)
         put("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
-
-            println("▶️ INTENTANDO ACTUALIZAR. ID RECIBIDO: $id")
             if (id == null) {
-                call.respond(HttpStatusCode.BadRequest, "Id invalido")
+                call.respond(HttpStatusCode.BadRequest, "ID inválido")
                 return@put
             }
             try {
-                val exhibitionData = call.receive<renewExhibition>()
+                // También actualizamos el PUT para usar el DTO
+                val request = call.receive<CreateExhibitionRequest>()
+                val parsedDate = LocalDate.parse(request.createdAt)
+
+                val exhibitionData = renewExhibition(
+                    idManager = request.idManager,
+                    title = request.title,
+                    description = request.description,
+                    category = request.category,
+                    createdAt = parsedDate,
+                    coverImageUrl = request.coverImageUrl
+                )
+
                 val updateExhibition = exhibitionService.updateExhibition(id, exhibitionData)
 
-                println("◀️ RESULTADO DEL REPOSITORIO: $updateExhibition")
                 if (updateExhibition != null) {
                     call.respond(HttpStatusCode.OK, updateExhibition.toResponse())
                 } else {
-                    println("❌ NO SE ENCONTRÓ EL ID $id. ENVIANDO 404.")
                     call.respond(HttpStatusCode.NotFound)
                 }
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "Datos invaldos: ${e.localizedMessage}")
+                call.respond(HttpStatusCode.BadRequest, "Datos inválidos: ${e.localizedMessage}")
             }
         }
+
+        // DELETE
         delete("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id == null) {
                 call.respond(HttpStatusCode.BadRequest, "Id invalido")
                 return@delete
             }
-            val exhibition = exhibitionService.deleteExhibition(id)
-            if (exhibition) {
-                call.respond(HttpStatusCode.NoContent, "Specimen eliminado")
+            val success = exhibitionService.deleteExhibition(id)
+            if (success) {
+                call.respond(HttpStatusCode.NoContent)
             } else {
                 call.respond(HttpStatusCode.NotFound)
             }
