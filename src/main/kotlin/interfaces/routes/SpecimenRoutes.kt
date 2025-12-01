@@ -1,8 +1,10 @@
 package com.Biodex.interfaces.routes
 
-import application.services.SpecimenService
 import domain.models.NewSpecimenData
 import domain.models.UpdateSpecimenData
+import interfaces.controllers.CreateSpecimenRequest
+import interfaces.controllers.UpdateSpecimenRequest
+import application.services.SpecimenService
 import interfaces.controllers.toResponse
 import io.ktor.http.*
 import io.ktor.server.request.*
@@ -13,172 +15,149 @@ import java.io.File
 import java.util.UUID
 import kotlinx.datetime.LocalDate
 
-// Helper function to save image files
-suspend fun saveImageFile(part: PartData.FileItem, uploadDir: File): String {
-    val fileName = part.originalFileName ?: "random_file_name"
-    val fileExtension = fileName.substringAfterLast('.', "")
-    val uniqueFileName = "${UUID.randomUUID()}.$fileExtension"
-    if (!uploadDir.exists()) {
-        uploadDir.mkdirs()
-    }
-    val file = File(uploadDir, uniqueFileName)
-    part.streamProvider().use { input ->
-        file.outputStream().buffered().use { output ->
-            input.copyTo(output)
-        }
-    }
-    return "/uploads/specimens/$uniqueFileName"
-}
-
 fun Route.specimenRoutes(specimenService: SpecimenService) {
+
     route("/specimens") {
+
+        // --- GET: OBTENER TODOS ---
         get {
             val specimens = specimenService.findAll()
+            // Mapeamos cada espécimen a su DTO de respuesta
             call.respond(HttpStatusCode.OK, specimens.map { it.toResponse() })
         }
-        get("{id}") {
 
+        // --- GET BY ID: OBTENER UNO ---
+        get("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id == null) {
                 call.respond(HttpStatusCode.BadRequest, "ID de espécimen inválido.")
                 return@get
             }
-            val specimen = specimenService.findSpecimenById(id) ?: return@get
+
+            // Usamos findSpecimenById (asegúrate que así se llama en tu servicio)
+            val specimen = specimenService.findSpecimenById(id)
 
             if (specimen != null) {
-                call.respond(HttpStatusCode.OK, specimen)
+                call.respond(HttpStatusCode.OK, specimen.toResponse())
             } else {
                 call.respond(HttpStatusCode.NotFound)
             }
         }
+
+        // --- POST: CREAR (NUEVO FLUJO CLOUDINARY) ---
         post {
-            val multipart = call.receiveMultipart()
-            var mainPhotoPath: String? = null
-            val additionalPhotoPaths = mutableListOf<String>()
-            val formFields = mutableMapOf<String, String>()
-            val uploadDir = File("uploads/specimens")
-
-            multipart.forEachPart { part ->
-                when (part) {
-                    is PartData.FileItem -> {
-                        when (part.name) {
-                            "mainPhoto" -> mainPhotoPath = saveImageFile(part, uploadDir)
-                            "additionalPhoto1", "additionalPhoto2", "additionalPhoto3", "additionalPhoto4", "additionalPhoto5", "additionalPhoto6" -> {
-                                additionalPhotoPaths.add(saveImageFile(part, uploadDir))
-                            }
-                        }
-                    }
-                    is PartData.FormItem -> {
-                        formFields[part.name!!] = part.value
-                    }
-                    else -> part.dispose()
-                }
-                part.dispose()
-            }
-
             try {
+                // 1. Recibimos el JSON limpio (Adiós Multipart)
+                val request = call.receive<CreateSpecimenRequest>()
+
+                // 2. Convertimos la fecha (String -> LocalDate)
+                val parsedDate = LocalDate.parse(request.collectionDate)
+
+                // 3. Preparamos los datos para guardar
                 val specimenData = NewSpecimenData(
-                    idCollection = formFields["idCollection"]?.toInt() ?: throw IllegalArgumentException("idCollection is missing"),
-                    commonName = formFields["commonName"] ?: throw IllegalArgumentException("commonName is missing"),
-                    idTaxonomy = formFields["idTaxonomy"]?.toInt() ?: throw IllegalArgumentException("idTaxonomy is missing"),
-                    collectionDate = LocalDate.parse(formFields["collectionDate"] ?: throw IllegalArgumentException("collectionDate is missing")),
-                    mainPhoto = mainPhotoPath,
-                    collector = formFields["collector"] ?: throw IllegalArgumentException("collector is missing"),
-                    idLocation = formFields["idLocation"]?.toInt() ?: throw IllegalArgumentException("idLocation is missing"),
-                    individualsCount = formFields["individualsCount"]?.toInt() ?: throw IllegalArgumentException("individualsCount is missing"),
-                    determinationYear = formFields["determinationYear"]?.toInt() ?: throw IllegalArgumentException("determinationYear is missing"),
-                    determinador = formFields["determinador"] ?: throw IllegalArgumentException("determinador is missing"),
-                    sex = formFields["sex"] ?: throw IllegalArgumentException("sex is missing"),
-                    vegetationType = formFields["vegetationType"] ?: throw IllegalArgumentException("vegetationType is missing"),
-                    collectionMethod = formFields["collectionMethod"] ?: throw IllegalArgumentException("collectionMethod is missing"),
-                    notes = formFields["notes"],
-                    additionalPhoto1 = additionalPhotoPaths.getOrNull(0),
-                    additionalPhoto2 = additionalPhotoPaths.getOrNull(1),
-                    additionalPhoto3 = additionalPhotoPaths.getOrNull(2),
-                    additionalPhoto4 = additionalPhotoPaths.getOrNull(3),
-                    additionalPhoto5 = additionalPhotoPaths.getOrNull(4),
-                    additionalPhoto6 = additionalPhotoPaths.getOrNull(5)
+                    idCollection = request.idCollection,
+                    commonName = request.commonName,
+                    idTaxonomy = request.idTaxonomy,
+                    collectionDate = parsedDate,
+                    collector = request.collector,
+                    idLocation = request.idLocation,
+                    individualsCount = request.individualsCount,
+                    determinationYear = request.determinationYear,
+                    determinador = request.determinador,
+                    sex = request.sex,
+                    vegetationType = request.vegetationType,
+                    collectionMethod = request.collectionMethod,
+                    notes = request.notes,
+
+                    // Aquí asignamos las URLs que llegaron de Cloudinary
+                    mainPhoto = request.mainPhoto,
+                    additionalPhoto1 = request.additionalPhoto1,
+                    additionalPhoto2 = request.additionalPhoto2,
+                    additionalPhoto3 = request.additionalPhoto3,
+                    additionalPhoto4 = request.additionalPhoto4,
+                    additionalPhoto5 = request.additionalPhoto5,
+                    additionalPhoto6 = request.additionalPhoto6
                 )
+
+                // 4. Guardamos en BD
+                // (Asegúrate que tu servicio tenga este método, o usa createNewSpecimen como tenías antes)
                 val newSpecimen = specimenService.createNewSpecimen(specimenData)
-                call.respond(HttpStatusCode.Created, "New specimen creada: ${newSpecimen.id}")
+
+                // 5. Respondemos
+                call.respond(HttpStatusCode.Created, newSpecimen.toResponse())
+
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, "Error al crear espécimen: ${e.localizedMessage}")
+                e.printStackTrace()
+                call.respond(HttpStatusCode.BadRequest, "Error al crear: ${e.localizedMessage}")
             }
         }
+
+        // --- PUT: ACTUALIZAR ---
         put("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id == null) {
-                call.respond(HttpStatusCode.BadRequest, "ID de espécimen inválido.")
+                call.respond(HttpStatusCode.BadRequest, "ID inválido.")
                 return@put
             }
 
-            val multipart = call.receiveMultipart()
-            var mainPhotoPath: String? = null
-            val additionalPhotoPaths = mutableListOf<String>()
-            val formFields = mutableMapOf<String, String>()
-            val uploadDir = File("uploads/specimens")
-
-            multipart.forEachPart { part ->
-                when (part) {
-                    is PartData.FileItem -> {
-                        when (part.name) {
-                            "mainPhoto" -> mainPhotoPath = saveImageFile(part, uploadDir)
-                            "additionalPhoto1", "additionalPhoto2", "additionalPhoto3", "additionalPhoto4", "additionalPhoto5", "additionalPhoto6" -> {
-                                additionalPhotoPaths.add(saveImageFile(part, uploadDir))
-                            }
-                        }
-                    }
-                    is PartData.FormItem -> {
-                        formFields[part.name!!] = part.value
-                    }
-                    else -> part.dispose()
-                }
-                part.dispose()
-            }
-
             try {
-                val specimenData = UpdateSpecimenData(
-                    idCollection = formFields["idCollection"]?.toInt(),
-                    commonName = formFields["commonName"],
-                    idTaxonomy = formFields["idTaxonomy"]?.toInt(),
-                    collectionDate = formFields["collectionDate"]?.let { LocalDate.parse(it) },
-                    mainPhoto = mainPhotoPath,
-                    collector = formFields["collector"],
-                    idLocation = formFields["idLocation"]?.toInt(),
-                    individualsCount = formFields["individualsCount"]?.toInt(),
-                    determinationYear = formFields["determinationYear"]?.toInt(),
-                    determinador = formFields["determinador"],
-                    sex = formFields["sex"],
-                    vegetationType = formFields["vegetationType"],
-                    collectionMethod = formFields["collectionMethod"],
-                    notes = formFields["notes"],
-                    additionalPhoto1 = additionalPhotoPaths.getOrNull(0),
-                    additionalPhoto2 = additionalPhotoPaths.getOrNull(1),
-                    additionalPhoto3 = additionalPhotoPaths.getOrNull(2),
-                    additionalPhoto4 = additionalPhotoPaths.getOrNull(3),
-                    additionalPhoto5 = additionalPhotoPaths.getOrNull(4),
-                    additionalPhoto6 = additionalPhotoPaths.getOrNull(5)
+                // 1. Recibimos JSON con campos opcionales
+                val request = call.receive<UpdateSpecimenRequest>()
+
+                // 2. Parseamos fecha solo si viene en la petición
+                val parsedDate = request.collectionDate?.let { LocalDate.parse(it) }
+
+                // 3. Preparamos datos de actualización
+                val updateData = UpdateSpecimenData(
+                    idCollection = request.idCollection,
+                    commonName = request.commonName,
+                    idTaxonomy = request.idTaxonomy,
+                    collectionDate = parsedDate,
+                    collector = request.collector,
+                    idLocation = request.idLocation,
+                    individualsCount = request.individualsCount,
+                    determinationYear = request.determinationYear,
+                    determinador = request.determinador,
+                    sex = request.sex,
+                    vegetationType = request.vegetationType,
+                    collectionMethod = request.collectionMethod,
+                    notes = request.notes,
+
+                    // URLs de fotos (si se actualizaron)
+                    mainPhoto = request.mainPhoto,
+                    additionalPhoto1 = request.additionalPhoto1,
+                    additionalPhoto2 = request.additionalPhoto2,
+                    additionalPhoto3 = request.additionalPhoto3,
+                    additionalPhoto4 = request.additionalPhoto4,
+                    additionalPhoto5 = request.additionalPhoto5,
+                    additionalPhoto6 = request.additionalPhoto6
                 )
-                val updatedSpecimen = specimenService.updateSpecimen(id, specimenData)
+
+                // 4. Actualizamos
+                val updatedSpecimen = specimenService.updateSpecimen(id, updateData)
 
                 if (updatedSpecimen != null) {
                     call.respond(HttpStatusCode.OK, updatedSpecimen.toResponse())
                 } else {
                     call.respond(HttpStatusCode.NotFound)
                 }
+
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, "Error al actualizar espécimen: ${e.localizedMessage}")
+                e.printStackTrace()
+                call.respond(HttpStatusCode.InternalServerError, "Error al actualizar: ${e.localizedMessage}")
             }
         }
+
+        // --- DELETE ---
         delete("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id == null) {
-                call.respond(HttpStatusCode.BadRequest, "Id invalido")
+                call.respond(HttpStatusCode.BadRequest, "ID inválido")
                 return@delete
             }
             val success = specimenService.deleteSpecimen(id)
             if (success) {
-                call.respond(HttpStatusCode.NoContent, "Specimen eliminado")
+                call.respond(HttpStatusCode.NoContent)
             } else {
                 call.respond(HttpStatusCode.NotFound)
             }
