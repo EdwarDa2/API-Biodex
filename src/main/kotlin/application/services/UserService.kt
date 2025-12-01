@@ -86,4 +86,11 @@ class UserService(private val userRepository: UserRepository) {
 
         return UserResponse.fromDomain(result)
     }
+
+    suspend fun deleteAccount(userId: Int): Boolean {
+        val user = userRepository.findById(userId)
+            ?: throw IllegalArgumentException("Usuario no encontrado")
+
+        return userRepository.delete(userId)
+    }
 }

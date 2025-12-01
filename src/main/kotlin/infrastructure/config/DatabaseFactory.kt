@@ -32,7 +32,8 @@ object DatabaseFactory {
                 LocationTable,
                 ExhibitionTable,
                 ExhibitionContentTable,
-                Users
+                Users,
+                RequestsTable
             )
         }
     }

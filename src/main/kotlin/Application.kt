@@ -7,9 +7,9 @@ import com.Biodex.application.services.ExhibitionService
 import com.Biodex.application.services.LocationService
 import com.Biodex.application.services.SpecimenImageService
 import com.Biodex.application.services.TaxonomyService
-import com.Biodex.application.services.UserService  // ← NUEVO
+import com.Biodex.application.services.UserService
 import com.Biodex.infrastructure.persistence.*
-import com.Biodex.infrastructure.security.configureJWTAuth  // ← NUEVO
+import com.Biodex.infrastructure.security.configureJWTAuth
 import com.Biodex.interfaces.routes.*
 import infrastructure.config.DatabaseFactory
 import infrastructure.persistence.ExposedSpecimenRepository
@@ -21,9 +21,11 @@ import io.ktor.server.http.content.staticFiles
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.routing.*
-import org.jetbrains.exposed.sql.SchemaUtils  // ← NUEVO
-import org.jetbrains.exposed.sql.transactions.transaction  // ← NUEVO
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
+import com.Biodex.application.services.RequestService
+import com.Biodex.infrastructure.persistence.RequestsTable
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -69,6 +71,9 @@ fun Application.module() {
     val userRepository = ExposedUserRepository()
     val userService = UserService(userRepository)
 
+    val requestRepository = ExposedRequestRepository()
+    val requestService = RequestService(requestRepository, userRepository)
+
     configureJWTAuth()
 
     routing {
@@ -82,6 +87,7 @@ fun Application.module() {
         uploadRoutes()
 
         userRoutes(userService)
+        requestRoutes(requestService)
 
         staticFiles(remotePath = "/uploads", dir = File("uploads"))
     }

@@ -44,4 +44,10 @@ dependencies {
 
     // BCrypt para encriptación
     implementation("org.mindrot:jbcrypt:0.4")
+
+
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
+
+    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:${exposed_version}")
+
 }

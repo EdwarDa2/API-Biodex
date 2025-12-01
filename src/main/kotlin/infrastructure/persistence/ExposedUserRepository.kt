@@ -5,6 +5,8 @@ import com.Biodex.domain.models.UserRoleEnum
 import com.Biodex.domain.repositorys.UserRepository
 import infrastructure.config.DatabaseFactory.dbQuery
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.deleteWhere
+
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
 object Users : Table("users") {
@@ -79,5 +81,9 @@ class ExposedUserRepository : UserRepository {
             description = row[Users.description],
             photo = row[Users.photo]
         )
+    }
+
+    override suspend fun delete(id: Int): Boolean = dbQuery {
+        Users.deleteWhere { Users.id eq id } > 0
     }
 }

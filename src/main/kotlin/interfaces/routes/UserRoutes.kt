@@ -65,6 +65,31 @@ fun Route.userRoutes(userService: UserService) {
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Error al actualizar perfil"))
                 }
+                delete {
+                    try {
+                        val userId = call.userId
+                        val deleted = userService.deleteAccount(userId)
+
+                        if (deleted) {
+                            call.respond(
+                                HttpStatusCode.OK,
+                                mapOf("message" to "Cuenta eliminada exitosamente")
+                            )
+                        } else {
+                            call.respond(
+                                HttpStatusCode.NotFound,
+                                mapOf("error" to "Usuario no encontrado")
+                            )
+                        }
+                    } catch (e: IllegalArgumentException) {
+                        call.respond(HttpStatusCode.NotFound, mapOf("error" to e.message))
+                    } catch (e: Exception) {
+                        call.respond(
+                            HttpStatusCode.InternalServerError,
+                            mapOf("error" to "Error al eliminar cuenta")
+                        )
+                    }
+                }
             }
         }
     }
