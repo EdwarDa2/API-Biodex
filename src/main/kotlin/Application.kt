@@ -17,15 +17,13 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
-import io.ktor.server.http.content.staticFiles
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.routing.*
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.io.File
 import com.Biodex.application.services.RequestService
-import com.Biodex.infrastructure.persistence.RequestsTable
+import com.Biodex.application.services.CloudinaryService
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -74,6 +72,8 @@ fun Application.module() {
     val requestRepository = ExposedRequestRepository()
     val requestService = RequestService(requestRepository, userRepository)
 
+    val cloudinaryService = CloudinaryService()
+
     configureJWTAuth()
 
     routing {
@@ -84,11 +84,11 @@ fun Application.module() {
         collectionRoutes(collectionService)
         exhibitionRoutes(exhibitionService)
         exhibitionContentRoutes(exhibitionContentService)
-        uploadRoutes()
+
+        uploadRoutes(cloudinaryService)
 
         userRoutes(userService)
         requestRoutes(requestService)
 
-        staticFiles(remotePath = "/uploads", dir = File("uploads"))
     }
 }

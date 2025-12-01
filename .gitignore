@@ -24,13 +24,12 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-
+!**/src/main/resources/aplication.yaml
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-
 ### VS Code ###
 .vscode/
