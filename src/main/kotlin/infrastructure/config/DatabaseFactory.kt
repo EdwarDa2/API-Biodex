@@ -1,10 +1,6 @@
 package infrastructure.config
 
-import com.Biodex.infrastructure.persistence.SpecimenImagesTable
-import com.Biodex.infrastructure.persistence.LocationTable
-import com.Biodex.infrastructure.persistence.TaxonomyTable
-import com.Biodex.infrastructure.persistence.ExhibitionTable
-import com.Biodex.infrastructure.persistence.ExhibitionContentTable
+import com.Biodex.infrastructure.persistence.*
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import infrastructure.persistence.SpecimensTable
@@ -29,7 +25,15 @@ object DatabaseFactory {
 
 
         transaction {
-            SchemaUtils.createMissingTablesAndColumns(TaxonomyTable, SpecimensTable, SpecimenImagesTable, LocationTable, ExhibitionTable, ExhibitionContentTable)
+            SchemaUtils.createMissingTablesAndColumns(
+                TaxonomyTable,
+                SpecimensTable,
+                SpecimenImagesTable,
+                LocationTable,
+                ExhibitionTable,
+                ExhibitionContentTable,
+                Users
+            )
         }
     }
 
@@ -50,6 +54,7 @@ object DatabaseFactory {
         }
         return HikariDataSource(config)
     }
+
     suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
 }

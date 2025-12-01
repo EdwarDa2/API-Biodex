@@ -36,4 +36,12 @@ dependencies {
 
     implementation("io.ktor:ktor-io:3.3.0")
     implementation("org.jetbrains.kotlinx:kotlinx-io-core:0.8.0")
+
+    // JWT y Autenticación
+    implementation("io.ktor:ktor-server-auth-jvm:2.3.7")
+    implementation("io.ktor:ktor-server-auth-jwt-jvm:2.3.7")
+    implementation("com.auth0:java-jwt:4.4.0")
+
+    // BCrypt para encriptación
+    implementation("org.mindrot:jbcrypt:0.4")
 }

@@ -7,24 +7,12 @@ import com.Biodex.application.services.ExhibitionService
 import com.Biodex.application.services.LocationService
 import com.Biodex.application.services.SpecimenImageService
 import com.Biodex.application.services.TaxonomyService
-import com.Biodex.domain.models.renewExhibitionContent
-import com.Biodex.domain.repositorys.ExhibitionContentRepository
-import com.Biodex.infrastructure.persistence.ExposedCollectionRespository
-import com.Biodex.infrastructure.persistence.ExposedExhibitionContentRepository
-import com.Biodex.infrastructure.persistence.ExposedExhibitionrepository
-import com.Biodex.infrastructure.persistence.ExposedLocationRepository
-import com.Biodex.infrastructure.persistence.ExposedSpecimenImageRepository
-import com.Biodex.infrastructure.persistence.ExposedTaxonomyRepository
-import com.Biodex.interfaces.routes.collectionRoutes
-import com.Biodex.interfaces.routes.exhibitionContentRoutes
-import com.Biodex.interfaces.routes.exhibitionRoutes
-import com.Biodex.interfaces.routes.locationRoutes
-import com.Biodex.interfaces.routes.specimenImageRoutes
-import com.Biodex.interfaces.routes.taxonomyRoutes
-import com.Biodex.interfaces.routes.uploadRoutes
+import com.Biodex.application.services.UserService  // ← NUEVO
+import com.Biodex.infrastructure.persistence.*
+import com.Biodex.infrastructure.security.configureJWTAuth  // ← NUEVO
+import com.Biodex.interfaces.routes.*
 import infrastructure.config.DatabaseFactory
 import infrastructure.persistence.ExposedSpecimenRepository
-import com.Biodex.interfaces.routes.specimenRoutes
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.serialization.kotlinx.json.*
@@ -33,14 +21,13 @@ import io.ktor.server.http.content.staticFiles
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.routing.*
+import org.jetbrains.exposed.sql.SchemaUtils  // ← NUEVO
+import org.jetbrains.exposed.sql.transactions.transaction  // ← NUEVO
 import java.io.File
-
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
-
 fun Application.module() {
-
 
     install(ContentNegotiation) {
         json()
@@ -54,13 +41,15 @@ fun Application.module() {
         allowHeader(HttpHeaders.Authorization)
         allowHeader(HttpHeaders.ContentType)
         allowHeader(HttpHeaders.AccessControlAllowOrigin)
-        allowHost("localhost:4200") // Permitir solicitudes desde el frontend de Angular
-        anyHost() // Puedes usar esto para permitir cualquier host durante el desarrollo, pero es menos seguro en producción
+        allowHost("localhost:4200")
+        anyHost()
     }
-
 
     DatabaseFactory.init(environment.config)
 
+    transaction {
+        SchemaUtils.createMissingTablesAndColumns(Users)
+    }
 
     val specimenRepository = ExposedSpecimenRepository()
     val specimenService = SpecimenService(specimenRepository)
@@ -77,7 +66,10 @@ fun Application.module() {
     val exhibitionService = ExhibitionService(exhibitionRepository, exhibitionContentRepository)
     val exhibitionContentService = ExhibitionContentService(exhibitionContentRepository)
 
+    val userRepository = ExposedUserRepository()
+    val userService = UserService(userRepository)
 
+    configureJWTAuth()
 
     routing {
         specimenRoutes(specimenService)
@@ -89,6 +81,8 @@ fun Application.module() {
         exhibitionContentRoutes(exhibitionContentService)
         uploadRoutes()
 
+        userRoutes(userService)
+
         staticFiles(remotePath = "/uploads", dir = File("uploads"))
-        }
+    }
 }
