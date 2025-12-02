@@ -31,6 +31,12 @@ fun Route.exhibitionRoutes(exhibitionService: ExhibitionService) {
             }
         }
 
+        // GET ALL
+        get {
+            val exhibitions = exhibitionService.getAllExhibitions()
+            call.respond(HttpStatusCode.OK, exhibitions.map { it.toResponse() })
+        }
+
         // GET por Manager
         get("manager/{idManager}") {
             val idManager = call.parameters["idManager"]?.toIntOrNull()

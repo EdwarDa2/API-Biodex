@@ -28,4 +28,8 @@ class ExhibitionService (
     fun getExhibitionsByManagerId(idManager: Int): List<Exhibition> {
         return exhibitionRepository.getExhibitionsByManagerId(idManager)
     }
+
+    fun getAllExhibitions(): List<Exhibition> {
+        return exhibitionRepository.getAllExhibitions()
+    }
 }

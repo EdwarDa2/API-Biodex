@@ -8,6 +8,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 
@@ -64,6 +65,14 @@ class ExposedExhibitionrepository: ExhibitionRepository {
         return transaction {
             ExhibitionTable
                 .select { ExhibitionTable.idManager eq idManager }
+                .map { it.toExhibition() }
+        }
+    }
+
+    override fun getAllExhibitions(): List<Exhibition> {
+        return transaction {
+            ExhibitionTable
+                .selectAll()
                 .map { it.toExhibition() }
         }
     }

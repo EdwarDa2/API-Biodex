@@ -9,4 +9,5 @@ interface ExhibitionRepository {
     fun updateExhibition(id: Int,exhibition: renewExhibition): Exhibition?
     fun deleteExhibition(id: Int):Boolean
     fun getExhibitionsByManagerId(idManager: Int): List<Exhibition>
+    fun getAllExhibitions(): List<Exhibition>
 }
