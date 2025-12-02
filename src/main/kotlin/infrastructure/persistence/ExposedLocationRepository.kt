@@ -8,6 +8,7 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
+import org.jetbrains.exposed.sql.and
 
 class ExposedLocationRepository: LocationRepository {
 
@@ -79,6 +80,29 @@ class ExposedLocationRepository: LocationRepository {
             getLocation(id)
         } else{
             null
+        }
+    }
+
+    override fun findByAttributes(
+        country: String, state: String, municipality: String, locality: String,
+        latitude_degrees: Int, latitude_minutes: Int, latitude_seconds: Double,
+        longitude_degrees: Int, longitude_minutes: Int, longitude_seconds: Double,
+        altitude: Double
+    ): Location? {
+        return transaction {
+            LocationTable.select {
+                (LocationTable.country eq country) and
+                (LocationTable.state eq state) and
+                (LocationTable.municipality eq municipality) and
+                (LocationTable.locality eq locality) and
+                (LocationTable.latitude_degrees eq latitude_degrees) and
+                (LocationTable.latitude_minutes eq latitude_minutes) and
+                (LocationTable.latitude_seconds eq latitude_seconds) and
+                (LocationTable.longitude_degrees eq longitude_degrees) and
+                (LocationTable.longitude_minutes eq longitude_minutes) and
+                (LocationTable.longitude_seconds eq longitude_seconds) and
+                (LocationTable.altitude eq altitude)
+            }.singleOrNull()?.toLocation()
         }
     }
 }

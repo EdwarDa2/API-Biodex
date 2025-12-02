@@ -16,6 +16,23 @@ import kotlin.text.toIntOrNull
 
 fun Route.taxonomyRoutes(taxonomyService: TaxonomyService) {
     route("/taxonomy") {
+        get("/search") {
+            val family = call.request.queryParameters["family"]
+            val genus = call.request.queryParameters["genus"]
+            val species = call.request.queryParameters["species"]
+            val category = call.request.queryParameters["category"]
+
+            if (family == null || genus == null || species == null || category == null) {
+                call.respond(HttpStatusCode.BadRequest, "Faltan parámetros de búsqueda para la taxonomía.")
+                return@get
+            }
+            val taxonomy = taxonomyService.getTaxonomyByAttributes(family, genus, species, category)
+            if (taxonomy != null) {
+                call.respond(HttpStatusCode.OK, taxonomy)
+            } else {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
         get("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if(id == null){

@@ -16,4 +16,8 @@ class TaxonomyService (
     fun updateTaxonomy(id: Int, taxonomy: NewTaxonomyData): Taxonomy? {
         return taxonomyRepository.updateTaxonomy(id,taxonomy)
     }
+
+    fun getTaxonomyByAttributes(family: String, genus: String, species: String, category: String): Taxonomy? {
+        return taxonomyRepository.findByAttributes(family, genus, species, category)
+    }
 }

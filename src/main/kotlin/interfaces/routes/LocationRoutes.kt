@@ -14,6 +14,38 @@ import io.ktor.server.routing.route
 
 fun Route.locationRoutes(locationService: LocationService) {
     route("/locations") {
+        get("/search") {
+            val country = call.request.queryParameters["country"]
+            val state = call.request.queryParameters["state"]
+            val municipality = call.request.queryParameters["municipality"]
+            val locality = call.request.queryParameters["locality"]
+            val latitude_degrees = call.request.queryParameters["latitude_degrees"]?.toIntOrNull()
+            val latitude_minutes = call.request.queryParameters["latitude_minutes"]?.toIntOrNull()
+            val latitude_seconds = call.request.queryParameters["latitude_seconds"]?.toDoubleOrNull()
+            val longitude_degrees = call.request.queryParameters["longitude_degrees"]?.toIntOrNull()
+            val longitude_minutes = call.request.queryParameters["longitude_minutes"]?.toIntOrNull()
+            val longitude_seconds = call.request.queryParameters["longitude_seconds"]?.toDoubleOrNull()
+            val altitude = call.request.queryParameters["altitude"]?.toDoubleOrNull()
+
+            if (country == null || state == null || municipality == null || locality == null ||
+                latitude_degrees == null || latitude_minutes == null || latitude_seconds == null ||
+                longitude_degrees == null || longitude_minutes == null || longitude_seconds == null ||
+                altitude == null) {
+                call.respond(HttpStatusCode.BadRequest, "Faltan parámetros de búsqueda para la ubicación.")
+                return@get
+            }
+            val location = locationService.getLocationByAttributes(
+                country, state, municipality, locality,
+                latitude_degrees, latitude_minutes, latitude_seconds,
+                longitude_degrees, longitude_minutes, longitude_seconds,
+                altitude
+            )
+            if (location != null) {
+                call.respond(HttpStatusCode.OK, location)
+            } else {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
         get("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id == null) {

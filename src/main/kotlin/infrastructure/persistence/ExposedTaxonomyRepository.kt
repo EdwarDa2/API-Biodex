@@ -9,6 +9,7 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
+import org.jetbrains.exposed.sql.and
 
 class ExposedTaxonomyRepository : TaxonomyRepository {
     override fun getTaxonomy(id: Int): Taxonomy? {
@@ -65,6 +66,17 @@ class ExposedTaxonomyRepository : TaxonomyRepository {
             getTaxonomy(id)
         } else {
             null
+        }
+    }
+
+    override fun findByAttributes(family: String, genus: String, species: String, category: String): Taxonomy? {
+        return transaction {
+            TaxonomyTable.select {
+                (TaxonomyTable.family eq family) and
+                (TaxonomyTable.genus eq genus) and
+                (TaxonomyTable.species eq species) and
+                (TaxonomyTable.category eq category)
+            }.singleOrNull()?.toTaxonomy()
         }
     }
 }
