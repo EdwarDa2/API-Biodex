@@ -9,8 +9,8 @@ import domain.repositorys.SpecimenRepository
 import kotlin.collections.map
 
 class CollectionService(
-private val collectionRepository: CollectionRepository,
-private val specimenRepository: SpecimenRepository
+    private val collectionRepository: CollectionRepository,
+    private val specimenRepository: SpecimenRepository
 ) {
 
     fun getCollectionByIdWithSpecimens(id: Int): CollectionResponse? {
@@ -54,6 +54,25 @@ private val specimenRepository: SpecimenRepository
             )
         }
     }
+    fun getCollectionsByUserId(idManager: Int): List<CollectionResponse> {
+        val collections = collectionRepository.findByManagerId(idManager)
+        val allSpecimens = specimenRepository.findAll()
+        val specimensByCollectionId = allSpecimens.groupBy { it.idCollection }
+
+        return collections.map { collection ->
+            val specimensForThisCollection = specimensByCollectionId[collection.id] ?: emptyList()
+            CollectionResponse(
+                id = collection.id,
+                name = collection.name,
+                description = collection.description,
+                idManager = collection.idManager,
+                category = collection.category,
+                createdAt = collection.createdAt,
+                imageUrl = collection.imageUrl,
+                specimens = specimensForThisCollection.map { it.toResponse() }
+            )
+        }
+    }
 
 
     fun createCollection(collection: renewCollection): Collection? {
@@ -66,5 +85,5 @@ private val specimenRepository: SpecimenRepository
 
     fun deleteCollection(id: Int): Boolean {
         return collectionRepository.deleteCollection(id)
-        }
+    }
 }

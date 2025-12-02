@@ -9,8 +9,9 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import com.Biodex.domain.models.SpecimenImage
 import com.Biodex.infrastructure.persistence.SpecimenImagesTable
 import com.Biodex.infrastructure.persistence.LocationTable
-import com.Biodex.infrastructure.persistence.TaxonomyTable
 import com.Biodex.infrastructure.persistence.toLocation
+import com.Biodex.infrastructure.persistence.TaxonomyTable
+import com.Biodex.infrastructure.persistence.CollectionTable
 import com.Biodex.infrastructure.persistence.toTaxonomy
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll

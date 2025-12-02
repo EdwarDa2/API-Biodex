@@ -9,4 +9,6 @@ interface CollectionRepository {
     fun createCollection(collection: renewCollection): Collection?
     fun updateCollection(id:Int,collection: renewCollection): Collection?
     fun deleteCollection(id: Int): Boolean
+    fun findByManagerId(idManager: Int): List<Collection>
+
 }

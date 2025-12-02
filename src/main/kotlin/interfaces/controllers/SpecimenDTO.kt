@@ -36,11 +36,11 @@ data class CreateSpecimenRequest(
 @Serializable
 data class UpdateSpecimenRequest(
     val idCollection: Int? = null,
-    val commonName: String? = null,
     val idTaxonomy: Int? = null,
+    val idLocation: Int? = null,
+    val commonName: String? = null,
     val collectionDate: String? = null,
     val collector: String? = null,
-    val idLocation: Int? = null,
     val individualsCount: Int? = null,
     val determinationYear: Int? = null,
     val determinador: String? = null,

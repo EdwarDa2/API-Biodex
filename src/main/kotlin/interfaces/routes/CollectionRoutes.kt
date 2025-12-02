@@ -42,6 +42,15 @@ fun Route.collectionRoutes(collectionService: CollectionService) {
             val collectionsResponse = collectionService.getAllCollectionsWithSpecimens()
             call.respond(HttpStatusCode.OK, collectionsResponse)
         }
+        get("manager/{idManager}") {
+            val idManager = call.parameters["idManager"]?.toIntOrNull()
+            if (idManager == null) {
+                call.respond(HttpStatusCode.BadRequest, "ID de Manager inválido.")
+                return@get
+            }
+            val collections = collectionService.getCollectionsByUserId(idManager)
+            call.respond(HttpStatusCode.OK, collections)
+        }
 
         // --- POST (CREAR) ---
         post {

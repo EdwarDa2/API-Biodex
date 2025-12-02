@@ -32,6 +32,12 @@ class ExposedCollectionRespository : CollectionRepository {
             CollectionTable.selectAll().map { it.toCollection() }
         }
     }
+    override fun findByManagerId(idManager: Int): List<Collection> {
+        return transaction {
+            CollectionTable.select { CollectionTable.idManager eq idManager }
+                .map { it.toCollection() }
+        }
+    }
 
     override fun createCollection(collection: renewCollection): Collection? {
         val newId = transaction {
