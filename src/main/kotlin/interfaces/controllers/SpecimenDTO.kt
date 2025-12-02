@@ -87,6 +87,7 @@ data class LocationDto(
 @Serializable
 data class SpecimenResponse(
     val id: Int,
+    val idCollection: Int?,
     val commonName: String,
     val collectionDate: LocalDate,
     val mainPhoto: String?,
@@ -116,6 +117,7 @@ data class SpecimenResponse(
 fun Specimen.toResponse(): SpecimenResponse {
     return SpecimenResponse(
         id = this.id,
+        idCollection = this.idCollection,
         commonName = this.commonName,
         collectionDate = this.collectionDate,
         mainPhoto = this.mainPhoto,
