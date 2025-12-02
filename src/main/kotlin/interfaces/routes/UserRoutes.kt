@@ -38,32 +38,35 @@ fun Route.userRoutes(userService: UserService) {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Error al iniciar sesión"))
             }
         }
-    }
-
-    authenticate("auth-jwt") {
-        route("/me") {
-            get {
-                try {
-                    val userId = call.userId
-                    val user = userService.getProfile(userId)
-                    call.respond(HttpStatusCode.OK, user)
-                } catch (e: IllegalArgumentException) {
-                    call.respond(HttpStatusCode.NotFound, mapOf("error" to e.message))
-                } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Error al obtener perfil"))
+        authenticate("auth-jwt") {
+            route("/me") {
+                get {
+                    try {
+                        val userId = call.userId
+                        val user = userService.getProfile(userId)
+                        call.respond(HttpStatusCode.OK, user)
+                    } catch (e: IllegalArgumentException) {
+                        call.respond(HttpStatusCode.NotFound, mapOf("error" to e.message))
+                    } catch (e: Exception) {
+                        call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Error al obtener perfil"))
+                    }
                 }
-            }
 
-            put {
-                try {
-                    val userId = call.userId
-                    val request = call.receive<com.Biodex.interfaces.controllers.UpdateUser>()
-                    val user = userService.updateProfile(userId, request)
-                    call.respond(HttpStatusCode.OK, user)
-                } catch (e: IllegalArgumentException) {
-                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
-                } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Error al actualizar perfil"))
+                put("{id}") {
+                    try {
+                        val userId = call.parameters["id"]?.toIntOrNull()
+                        if (userId == null) {
+                            call.respond(HttpStatusCode.BadRequest, mapOf("error" to "ID de usuario inválido"))
+                            return@put
+                        }
+                        val request = call.receive<com.Biodex.interfaces.controllers.UpdateUser>()
+                        val user = userService.updateProfile(userId, request)
+                        call.respond(HttpStatusCode.OK, user)
+                    } catch (e: IllegalArgumentException) {
+                        call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
+                    } catch (e: Exception) {
+                        call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Error al actualizar perfil"))
+                    }
                 }
                 delete {
                     try {
@@ -93,4 +96,4 @@ fun Route.userRoutes(userService: UserService) {
             }
         }
     }
-}
+    }
